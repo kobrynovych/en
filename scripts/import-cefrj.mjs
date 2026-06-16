@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
@@ -168,17 +168,41 @@ async function loadEnrichment() {
   const seedPath = path.join(ENRICHMENT_DIR, "core-a1.jsonl");
 
   try {
-    const lines = (await readFile(seedPath, "utf8"))
+    await readFile(seedPath, "utf8");
+  } catch {
+    await writeFile(seedPath, `${DEFAULT_ENRICHMENT_LINES.join("\n")}\n`, "utf8");
+  }
+
+  const files = (await readdir(ENRICHMENT_DIR))
+    .filter((file) => file.endsWith(".jsonl"))
+    .sort((a, b) => {
+      const aAuto = a.startsWith("auto-") ? 0 : 1;
+      const bAuto = b.startsWith("auto-") ? 0 : 1;
+      return aAuto - bAuto || a.localeCompare(b);
+    });
+
+  for (const file of files) {
+    const filePath = path.join(ENRICHMENT_DIR, file);
+    const lines = (await readFile(filePath, "utf8"))
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter(Boolean);
+
     for (const line of lines) {
       const entry = JSON.parse(line);
-      entries.set(entry.slug, entry);
+      const current = entries.get(entry.slug) ?? {};
+      entries.set(entry.slug, {
+        ...current,
+        ...entry,
+        categories: Array.from(new Set([...(current.categories ?? []), ...(entry.categories ?? [])])),
+        sourceRefs: Array.from(new Set([...(current.sourceRefs ?? []), ...(entry.sourceRefs ?? [])])),
+        translationsUk:
+          Array.isArray(entry.translationsUk) && entry.translationsUk.length > 0
+            ? entry.translationsUk
+            : current.translationsUk,
+        examples: Array.isArray(entry.examples) && entry.examples.length > 0 ? entry.examples : current.examples,
+      });
     }
-  } catch {
-    await writeFile(seedPath, `${DEFAULT_ENRICHMENT_LINES.join("\n")}\n`, "utf8");
-    return loadEnrichment();
   }
 
   return entries;

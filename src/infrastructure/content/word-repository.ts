@@ -4,6 +4,7 @@ import { cache } from "react";
 import { wordEntrySchema } from "@/domain/learning/schemas";
 import { ACTIVE_LEVELS, type ActiveCefrLevel, type PartOfSpeech, type WordEntry } from "@/domain/learning/types";
 import { sortWordsForStudy } from "@/domain/learning/search";
+import type { StatsWordMeta } from "@/domain/learning/stats";
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "words");
 
@@ -27,6 +28,39 @@ export const getAllWords = cache(async (): Promise<WordEntry[]> => {
 export const getWordsByLevel = cache(async (level: ActiveCefrLevel): Promise<WordEntry[]> => {
   const words = await readJsonl(path.join(CONTENT_ROOT, `${level.toLowerCase()}.jsonl`));
   return sortWordsForStudy(words);
+});
+
+function stripExamples(word: WordEntry): WordEntry {
+  return {
+    ...word,
+    examples: [],
+  };
+}
+
+function stripForStats(word: WordEntry): StatsWordMeta {
+  return {
+    id: word.id,
+    cefr: word.cefr,
+    categories: word.categories,
+  };
+}
+
+export const getAllWordStatsMetas = cache(async (): Promise<StatsWordMeta[]> => {
+  const words = await getAllWords();
+  return words.map(stripForStats);
+});
+
+export const getWordListByLevel = cache(async (level: ActiveCefrLevel): Promise<WordEntry[]> => {
+  const words = await getWordsByLevel(level);
+  return words.map(stripExamples);
+});
+
+export const getPracticeWords = cache(async (): Promise<WordEntry[]> => {
+  const words = await getAllWords();
+  return words.map((word) => ({
+    ...stripExamples(word),
+    examples: word.examples.slice(0, 1),
+  }));
 });
 
 export const getWordBySlug = cache(async (slug: string) => {

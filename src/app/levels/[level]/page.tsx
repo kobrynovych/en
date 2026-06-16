@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ACTIVE_LEVELS, type ActiveCefrLevel } from "@/domain/learning/types";
 import { LevelVocabularyClient } from "@/features/vocabulary/level-vocabulary-client";
-import { getContentSummary, getWordsByLevel } from "@/infrastructure/content/word-repository";
+import { getContentSummary, getWordListByLevel } from "@/infrastructure/content/word-repository";
 import { PageShell } from "@/shared/ui/page-shell";
 
 export function generateStaticParams() {
@@ -21,7 +21,7 @@ export default async function LevelPage({ params }: { params: Promise<{ level: s
 
   if (!ACTIVE_LEVELS.includes(level)) notFound();
 
-  const [words, summary] = await Promise.all([getWordsByLevel(level), getContentSummary()]);
+  const [words, summary] = await Promise.all([getWordListByLevel(level), getContentSummary()]);
 
   return (
     <PageShell>

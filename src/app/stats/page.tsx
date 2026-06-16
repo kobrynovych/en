@@ -1,5 +1,5 @@
 import { StatsClient } from "@/features/stats/stats-client";
-import { getAllWords } from "@/infrastructure/content/word-repository";
+import { getAllWordStatsMetas } from "@/infrastructure/content/word-repository";
 import { PageShell } from "@/shared/ui/page-shell";
 
 export const metadata = {
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function StatsPage() {
-  const words = await getAllWords();
+  const words = await getAllWordStatsMetas();
 
   return (
     <PageShell>

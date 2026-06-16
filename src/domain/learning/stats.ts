@@ -1,7 +1,13 @@
-import { ACTIVE_LEVELS, type ActiveCefrLevel, type LearningStats, type WordEntry, type WordProgress } from "./types";
+import { ACTIVE_LEVELS, type ActiveCefrLevel, type CefrLevel, type LearningStats, type WordProgress } from "./types";
 import { isDue, percentage } from "./progress";
 
-export function computeLearningStats(words: WordEntry[], progressByWord: Record<string, WordProgress>, now = new Date()): LearningStats {
+export interface StatsWordMeta {
+  id: string;
+  cefr: CefrLevel;
+  categories: string[];
+}
+
+export function computeLearningStats(words: StatsWordMeta[], progressByWord: Record<string, WordProgress>, now = new Date()): LearningStats {
   const learnedWords = words.filter((word) => progressByWord[word.id]?.learned).length;
   const dueWords = words.filter((word) => isDue(progressByWord[word.id], now)).length;
   const correct = Object.values(progressByWord).reduce((sum, progress) => sum + progress.correctCount, 0);

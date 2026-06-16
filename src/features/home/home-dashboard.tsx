@@ -3,8 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, BarChart3, BookOpenCheck, Brain, ClipboardCheck, Database, RotateCcw, Sparkles } from "lucide-react";
-import { computeLearningStats } from "@/domain/learning/stats";
-import type { WordEntry } from "@/domain/learning/types";
+import { computeLearningStats, type StatsWordMeta } from "@/domain/learning/stats";
 import { useHydratedProgress, useProgressStore } from "@/features/progress/use-progress-store";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
@@ -15,7 +14,7 @@ export function HomeDashboard({
   words,
   enrichedWords,
 }: {
-  words: WordEntry[];
+  words: StatsWordMeta[];
   enrichedWords: number;
 }) {
   useHydratedProgress();

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "content:import": "node scripts/import-cefrj.mjs",
+    "content:enrich": "node scripts/enrich-content.mjs",
     "content:validate": "node scripts/validate-content.mjs",
     "content:validate:release": "node scripts/validate-content.mjs --strict"
   },
@@ -42,6 +43,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "ipa-dict": "^1.0.3",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",

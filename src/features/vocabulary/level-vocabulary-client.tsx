@@ -49,6 +49,8 @@ export function LevelVocabularyClient({
     [filters, progressByWord, words],
   );
 
+  // TanStack Virtual intentionally returns imperative helpers; the hook is safe here because rows are not memoized across stores.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredWords.length,
     getScrollElement: () => parentRef.current,

@@ -1,5 +1,5 @@
 import { FlashcardsClient } from "@/features/practice/flashcards-client";
-import { getAllWords } from "@/infrastructure/content/word-repository";
+import { getPracticeWords } from "@/infrastructure/content/word-repository";
 import { PageShell } from "@/shared/ui/page-shell";
 
 export const metadata = {
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function FlashcardsPage() {
-  const words = await getAllWords();
+  const words = await getPracticeWords();
 
   return (
     <PageShell>

@@ -1,15 +1,14 @@
 "use client";
 
 import { AlertTriangle, BarChart3, RefreshCcw } from "lucide-react";
-import { computeLearningStats } from "@/domain/learning/stats";
-import type { WordEntry } from "@/domain/learning/types";
+import { computeLearningStats, type StatsWordMeta } from "@/domain/learning/stats";
 import { useHydratedProgress, useProgressStore } from "@/features/progress/use-progress-store";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Progress } from "@/shared/ui/progress";
 
-export function StatsClient({ words }: { words: WordEntry[] }) {
+export function StatsClient({ words }: { words: StatsWordMeta[] }) {
   useHydratedProgress();
   const progressByWord = useProgressStore((state) => state.progressByWord);
   const resetAllProgress = useProgressStore((state) => state.resetAllProgress);
