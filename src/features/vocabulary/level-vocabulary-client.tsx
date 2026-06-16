@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { RotateCcw, Search, SlidersHorizontal } from "lucide-react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { matchesVocabularyFilters } from "@/domain/learning/search";
 import type { ActiveCefrLevel, PartOfSpeech, WordEntry } from "@/domain/learning/types";
 import { percentage } from "@/domain/learning/progress";
@@ -30,7 +29,6 @@ export function LevelVocabularyClient({
   partsOfSpeech: PartOfSpeech[];
 }) {
   useHydratedProgress();
-  const parentRef = useRef<HTMLDivElement | null>(null);
   const progressByWord = useProgressStore((state) => state.progressByWord);
   const toggleLearned = useProgressStore((state) => state.toggleLearned);
   const filters = useVocabularyStore((state) => state.getFilters(level));
@@ -48,15 +46,6 @@ export function LevelVocabularyClient({
     () => words.filter((word) => matchesVocabularyFilters(word, progressByWord[word.id], filters)),
     [filters, progressByWord, words],
   );
-
-  // TanStack Virtual intentionally returns imperative helpers; the hook is safe here because rows are not memoized across stores.
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: filteredWords.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 102,
-    overscan: 8,
-  });
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -105,21 +94,10 @@ export function LevelVocabularyClient({
         </div>
 
         {filteredWords.length > 0 ? (
-          <div ref={parentRef} className="h-[68vh] overflow-auto rounded-lg border border-slate-200 bg-white">
-            <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
-              {virtualizer.getVirtualItems().map((virtualItem) => {
-                const word = filteredWords[virtualItem.index];
-                return (
-                  <div
-                    key={word.id}
-                    className="absolute left-0 top-0 w-full"
-                    style={{ transform: `translateY(${virtualItem.start}px)` }}
-                  >
-                    <WordCard word={word} progress={progressByWord[word.id]} onToggleLearned={(wordId) => void toggleLearned(wordId)} />
-                  </div>
-                );
-              })}
-            </div>
+          <div className="max-h-[68vh] overflow-auto rounded-lg border border-slate-200 bg-white">
+            {filteredWords.map((word) => (
+              <WordCard key={word.id} word={word} progress={progressByWord[word.id]} onToggleLearned={(wordId) => void toggleLearned(wordId)} />
+            ))}
           </div>
         ) : (
           <EmptyState

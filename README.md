@@ -16,6 +16,7 @@ https://kobrynovych.github.io/en/
 - Zustand for client state
 - Zod for content validation
 - Vitest and Playwright
+- Persisted light/dark/system theme with dark fallback
 
 ## Content
 
@@ -49,9 +50,13 @@ npm run content:validate:release
 npm run lint
 npm run test
 npm run build
+npm run build:pages
+npm run deploy:pages
 ```
 
 `npm run build` creates a static export in `out/`.
+
+`npm run deploy:pages` runs validation, lint, unit tests, a GitHub Pages build with `/en` as the base path, then pushes the current branch. GitHub Actions performs the actual Pages deployment after the push.
 
 ## GitHub Pages
 
@@ -64,6 +69,8 @@ Important repository setting:
 3. Push to `master` or `main`.
 
 The workflow validates content, lints, builds the static export, uploads `out/`, and deploys it to GitHub Pages. `next.config.ts` uses `/en` as `basePath` only inside GitHub Actions, so local development still runs at `/`.
+
+Theme preference is stored in `localStorage` under `english-path-theme`. The default preference is `system`; if the browser cannot report a system color scheme, the app resolves to dark mode.
 
 ## Architecture
 

@@ -3,6 +3,13 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #e2e8f0;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -16,6 +23,80 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.dark .bg-white {
+  background-color: #0f172a;
+}
+
+.dark .bg-white\/95 {
+  background-color: rgb(2 6 23 / 0.95);
+}
+
+.dark .bg-slate-50 {
+  background-color: #020617;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1e293b;
+}
+
+.dark .bg-slate-200 {
+  background-color: #334155;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-200 {
+  border-color: #1e293b;
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1e293b;
+}
+
+.dark .hover\:text-slate-950:hover {
+  color: #ffffff;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgb(6 78 59 / 0.38);
+}
+
+.dark .bg-sky-50 {
+  background-color: rgb(12 74 110 / 0.38);
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.36);
+}
+
+.dark .text-emerald-800 {
+  color: #6ee7b7;
+}
+
+.dark .text-sky-800 {
+  color: #7dd3fc;
+}
+
+.dark .text-amber-800,
+.dark .text-amber-700 {
+  color: #fcd34d;
 }
 
 * {
