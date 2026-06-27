@@ -5,6 +5,7 @@ import { Check, ChevronRight, Volume2 } from "lucide-react";
 import type { WordEntry, WordProgress } from "@/domain/learning/types";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
+import { SpeakButton } from "@/shared/ui/speak-button";
 import { cn } from "@/shared/lib/cn";
 
 export function WordCard({
@@ -45,6 +46,7 @@ export function WordCard({
             {word.ipa}
           </span>
         ) : null}
+        <SpeakButton word={word.headword} />
         <Button
           type="button"
           size="icon"

@@ -10,6 +10,7 @@ import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Select } from "@/shared/ui/select";
+import { SpeakButton } from "@/shared/ui/speak-button";
 
 type Direction = "word-to-translation" | "translation-to-word" | "random";
 
@@ -81,12 +82,22 @@ export function FlashcardsClient({ words }: { words: WordEntry[] }) {
             <p className="mt-5 text-4xl font-black text-slate-950">
               {effectiveDirection === "word-to-translation" ? word.headword : word.translationsUk[0]}
             </p>
+            {effectiveDirection === "word-to-translation" ? (
+              <div className="mt-3 flex justify-center">
+                <SpeakButton word={word.headword} size="md" />
+              </div>
+            ) : null}
             {revealed ? (
               <div className="mt-6 border-t border-slate-200 pt-5">
                 <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Відповідь</p>
                 <p className="mt-2 text-2xl font-black text-emerald-700">
                   {effectiveDirection === "word-to-translation" ? word.translationsUk.join(", ") : word.headword}
                 </p>
+                {effectiveDirection === "translation-to-word" ? (
+                  <div className="mt-2 flex justify-center">
+                    <SpeakButton word={word.headword} size="md" />
+                  </div>
+                ) : null}
                 {word.ipa ? <p className="mt-2 text-sm font-semibold text-slate-500">{word.ipa}</p> : null}
               </div>
             ) : null}

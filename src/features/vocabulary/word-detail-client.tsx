@@ -8,6 +8,7 @@ import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { SpeakButton } from "@/shared/ui/speak-button";
 
 export function WordDetailClient({ word }: { word: WordEntry }) {
   useHydratedProgress();
@@ -37,6 +38,7 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
           </div>
           <h1 className="mt-5 text-4xl font-black leading-tight text-slate-950 sm:text-6xl">{word.headword}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
+            <SpeakButton word={word.headword} size="md" />
             {word.ipa ? (
               <span className="inline-flex items-center gap-2">
                 <Volume2 className="size-4" aria-hidden="true" />
