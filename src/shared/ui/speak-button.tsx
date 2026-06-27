@@ -31,6 +31,7 @@ export function SpeakButton({ word, lang = "en-US", className, size = "icon" }: 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: classic SSR hydration guard
     setMounted(true);
   }, []);
 
