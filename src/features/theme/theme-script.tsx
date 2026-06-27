@@ -1,22 +1,9 @@
 const THEME_STORAGE_KEY = "english-path-theme";
 
-export function ThemeScript() {
-  const code = `
-(() => {
-  const storageKey = "${THEME_STORAGE_KEY}";
-  const root = document.documentElement;
-  let stored = null;
-  try {
-    stored = localStorage.getItem(storageKey);
-  } catch {}
-  const preference = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
-  const systemDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)").matches : true;
-  const resolved = preference === "system" ? (systemDark ? "dark" : "light") : preference;
-  root.classList.toggle("dark", resolved === "dark");
-  root.dataset.theme = resolved;
-  root.dataset.themePreference = preference;
-})();
-`;
+// Runs synchronously before first paint to set the correct theme class and
+// prevent a flash of wrong color scheme.
+const themeCode = `(function(){var k="${THEME_STORAGE_KEY}",r=document.documentElement,s;try{s=localStorage.getItem(k)}catch(e){}var t=(s==="light"||s==="dark")?s:((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");r.classList.toggle("dark",t==="dark");r.dataset.theme=t;})();`;
 
-  return <script dangerouslySetInnerHTML={{ __html: code }} />;
+export function ThemeScript() {
+  return <script dangerouslySetInnerHTML={{ __html: themeCode }} suppressHydrationWarning />;
 }

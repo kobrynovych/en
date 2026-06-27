@@ -5,10 +5,10 @@ export function EmptyState({ icon, title, text }: { icon: ReactNode; title: stri
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-        <div className="grid size-12 place-items-center rounded-md bg-slate-100 text-slate-600">{icon}</div>
+        <div className="grid size-12 place-items-center rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">{icon}</div>
         <div>
-          <h2 className="text-base font-bold text-slate-950">{title}</h2>
-          <p className="mt-1 max-w-sm text-sm leading-6 text-slate-600">{text}</p>
+          <h2 className="text-base font-bold text-slate-950 dark:text-slate-100">{title}</h2>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-400">{text}</p>
         </div>
       </CardContent>
     </Card>

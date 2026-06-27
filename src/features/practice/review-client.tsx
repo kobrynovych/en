@@ -45,10 +45,10 @@ export function ReviewClient({ words }: { words: WordEntry[] }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-20 lg:pb-0">
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800/60">
         <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Leitner system</p>
-        <h1 className="mt-1 text-3xl font-black text-slate-950">Повторення</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h1 className="mt-1 text-3xl font-black text-slate-950 dark:text-slate-100">Повторення</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
           Правильна відповідь піднімає слово до наступної коробки, помилка повертає його до першої.
         </p>
       </div>
@@ -61,13 +61,13 @@ export function ReviewClient({ words }: { words: WordEntry[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="rounded-md bg-slate-50 p-6 text-center">
-            <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Пригадай переклад</p>
-            <p className="mt-5 text-4xl font-black text-slate-950">{word.headword}</p>
+          <div className="rounded-md bg-slate-50 p-6 text-center dark:bg-slate-800">
+            <p className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Пригадай переклад</p>
+            <p className="mt-5 text-4xl font-black text-slate-950 dark:text-slate-100">{word.headword}</p>
             {revealed ? (
-              <div className="mt-6 border-t border-slate-200 pt-5">
-                <p className="text-2xl font-black text-emerald-700">{word.translationsUk.join(", ")}</p>
-                {word.examples[0] ? <p className="mt-4 text-sm text-slate-600">{word.examples[0].text}</p> : null}
+              <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
+                <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{word.translationsUk.join(", ")}</p>
+                {word.examples[0] ? <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">{word.examples[0].text}</p> : null}
               </div>
             ) : null}
           </div>

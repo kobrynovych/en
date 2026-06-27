@@ -6,10 +6,10 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const variantClass: Record<ButtonVariant, string> = {
-  primary: "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 hover:bg-emerald-700 focus-visible:ring-emerald-600",
-  secondary: "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-emerald-600",
-  ghost: "text-slate-700 hover:bg-slate-100 focus-visible:ring-emerald-600",
-  danger: "bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-600",
+  primary:   "bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 hover:bg-emerald-700 focus-visible:ring-emerald-600",
+  secondary: "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-emerald-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700",
+  ghost:     "text-slate-700 hover:bg-slate-100 focus-visible:ring-emerald-600 dark:text-slate-300 dark:hover:bg-slate-800",
+  danger:    "bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-600",
 };
 
 const sizeClass: Record<ButtonSize, string> = {

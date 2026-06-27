@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { useSpeech } from "@/shared/lib/use-speech";
 import { Button } from "@/shared/ui/button";
@@ -20,11 +21,21 @@ interface SpeakButtonProps {
  * A small icon button that speaks `word` using the Web Speech API.
  * Renders nothing when speechSynthesis is unavailable (e.g. during SSR or
  * in unsupported browsers) so it degrades gracefully.
+ *
+ * Uses a `mounted` guard so SSR and the first client render both output null,
+ * preventing the hydration mismatch that occurs when the server doesn't know
+ * whether the browser supports speechSynthesis.
  */
 export function SpeakButton({ word, lang = "en-US", className, size = "icon" }: SpeakButtonProps) {
   const { speak, speaking, supported } = useSpeech(lang);
+  const [mounted, setMounted] = useState(false);
 
-  if (!supported) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Render nothing until after hydration so SSR and first client render match.
+  if (!mounted || !supported) return null;
 
   return (
     <Button

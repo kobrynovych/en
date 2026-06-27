@@ -48,10 +48,10 @@ export function FlashcardsClient({ words }: { words: WordEntry[] }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-20 lg:pb-0">
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800/60">
         <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Active recall</p>
-        <h1 className="mt-1 text-3xl font-black text-slate-950">Флеш-картки</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h1 className="mt-1 text-3xl font-black text-slate-950 dark:text-slate-100">Флеш-картки</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
           Спочатку спробуй пригадати відповідь, потім відкрий картку і оціни себе.
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -75,11 +75,11 @@ export function FlashcardsClient({ words }: { words: WordEntry[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 text-center">
-          <div className="min-h-48 rounded-md bg-slate-50 p-6">
-            <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          <div className="min-h-48 rounded-md bg-slate-50 p-6 dark:bg-slate-800">
+            <p className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               {effectiveDirection === "word-to-translation" ? "Англійське слово" : "Український переклад"}
             </p>
-            <p className="mt-5 text-4xl font-black text-slate-950">
+            <p className="mt-5 text-4xl font-black text-slate-950 dark:text-slate-100">
               {effectiveDirection === "word-to-translation" ? word.headword : word.translationsUk[0]}
             </p>
             {effectiveDirection === "word-to-translation" ? (
@@ -88,9 +88,9 @@ export function FlashcardsClient({ words }: { words: WordEntry[] }) {
               </div>
             ) : null}
             {revealed ? (
-              <div className="mt-6 border-t border-slate-200 pt-5">
-                <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Відповідь</p>
-                <p className="mt-2 text-2xl font-black text-emerald-700">
+              <div className="mt-6 border-t border-slate-200 pt-5 dark:border-slate-700">
+                <p className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Відповідь</p>
+                <p className="mt-2 text-2xl font-black text-emerald-700 dark:text-emerald-400">
                   {effectiveDirection === "word-to-translation" ? word.translationsUk.join(", ") : word.headword}
                 </p>
                 {effectiveDirection === "translation-to-word" ? (
@@ -98,7 +98,7 @@ export function FlashcardsClient({ words }: { words: WordEntry[] }) {
                     <SpeakButton word={word.headword} size="md" />
                   </div>
                 ) : null}
-                {word.ipa ? <p className="mt-2 text-sm font-semibold text-slate-500">{word.ipa}</p> : null}
+                {word.ipa ? <p className="mt-2 text-sm font-semibold text-slate-500 dark:text-slate-400">{word.ipa}</p> : null}
               </div>
             ) : null}
           </div>

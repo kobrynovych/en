@@ -50,17 +50,17 @@ export function LevelVocabularyClient({
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
       <section className="min-w-0 space-y-4">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/60">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Рівень {level}</p>
-              <h1 className="mt-1 text-2xl font-black text-slate-950">Словник {level}</h1>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
+              <h1 className="mt-1 text-2xl font-black text-slate-950 dark:text-slate-100">Словник {level}</h1>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 {words.length.toLocaleString("uk-UA")} слів CEFR-J, {filteredWords.length.toLocaleString("uk-UA")} показано за фільтрами.
               </p>
             </div>
             <div className="min-w-48">
-              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-slate-700">
+              <div className="mb-2 flex items-center justify-between text-sm font-semibold text-slate-700 dark:text-slate-300">
                 <span>Прогрес</span>
                 <span>{levelProgressPercent}%</span>
               </div>
@@ -69,7 +69,7 @@ export function LevelVocabularyClient({
           </div>
         </div>
 
-        <div className="sticky top-[65px] z-30 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="sticky top-[65px] z-30 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <div className="grid gap-2 sm:grid-cols-[1fr_180px_auto]">
             <label className="relative block">
               <span className="sr-only">Пошук слова або перекладу</span>
@@ -94,7 +94,7 @@ export function LevelVocabularyClient({
         </div>
 
         {filteredWords.length > 0 ? (
-          <div className="max-h-[68vh] overflow-auto rounded-lg border border-slate-200 bg-white">
+          <div className="max-h-[68vh] overflow-auto rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
             {filteredWords.map((word) => (
               <WordCard key={word.id} word={word} progress={progressByWord[word.id]} onToggleLearned={(wordId) => void toggleLearned(wordId)} />
             ))}
@@ -123,7 +123,7 @@ export function LevelVocabularyClient({
                   onClick={() => toggleCategory(level, category)}
                   className={cn(
                     "rounded-md border px-2.5 py-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600",
-                    active ? "border-emerald-600 bg-emerald-50 text-emerald-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                    active ? "border-emerald-600 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
                   )}
                 >
                   {category}
@@ -147,7 +147,7 @@ export function LevelVocabularyClient({
                   onClick={() => togglePartOfSpeech(level, pos)}
                   className={cn(
                     "rounded-md border px-2.5 py-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600",
-                    active ? "border-sky-600 bg-sky-50 text-sky-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
+                    active ? "border-sky-600 bg-sky-50 text-sky-800 dark:bg-sky-950 dark:text-sky-400" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
                   )}
                 >
                   {pos}
@@ -161,9 +161,9 @@ export function LevelVocabularyClient({
           <CardHeader>
             <CardTitle>Стан контенту</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm leading-6 text-slate-600">
+          <CardContent className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
             <p>
-              <Badge className="mr-2 bg-amber-50 text-amber-800">base</Badge>
+              <Badge variant="amber" className="mr-2">base</Badge>
               означає імпортований CEFR-запис, який чекає на повне IPA/переклад/приклади у enrichment JSONL.
             </p>
           </CardContent>

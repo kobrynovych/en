@@ -26,9 +26,9 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
       </Button>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="rounded-lg border border-slate-200 bg-white p-5 sm:p-7">
+        <div className="rounded-lg border border-slate-200 bg-white p-5 sm:p-7 dark:border-slate-700 dark:bg-slate-800/60">
           <div className="flex flex-wrap gap-2">
-            <Badge className="bg-emerald-50 text-emerald-800">{word.cefr}</Badge>
+            <Badge variant="emerald">{word.cefr}</Badge>
             <Badge>{word.pos}</Badge>
             {word.categories.map((category) => (
               <Badge key={category} className="capitalize">
@@ -36,8 +36,8 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
               </Badge>
             ))}
           </div>
-          <h1 className="mt-5 text-4xl font-black leading-tight text-slate-950 sm:text-6xl">{word.headword}</h1>
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600">
+          <h1 className="mt-5 text-4xl font-black leading-tight text-slate-950 sm:text-6xl dark:text-slate-100">{word.headword}</h1>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-600 dark:text-slate-400">
             <SpeakButton word={word.headword} size="md" />
             {word.ipa ? (
               <span className="inline-flex items-center gap-2">
@@ -50,8 +50,8 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
             {word.britishSpelling ? <span>British: {word.britishSpelling}</span> : null}
           </div>
           <div className="mt-6">
-            <p className="text-sm font-bold uppercase tracking-wide text-slate-500">Переклад</p>
-            <p className="mt-2 text-2xl font-black text-slate-950">
+            <p className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Переклад</p>
+            <p className="mt-2 text-2xl font-black text-slate-950 dark:text-slate-100">
               {word.translationsUk.length > 0 ? word.translationsUk.join(", ") : "Очікує українське збагачення"}
             </p>
           </div>
@@ -73,7 +73,7 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
           <CardHeader>
             <CardTitle>Дані запису</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm text-slate-600">
+          <CardContent className="space-y-4 text-sm text-slate-600 dark:text-slate-400">
             <InfoRow label="American" value={word.americanSpelling} />
             <InfoRow label="British" value={word.britishSpelling ?? "не відрізняється або не задано"} />
             <InfoRow label="Review box" value={String(progress?.reviewBox ?? 1)} />
@@ -93,7 +93,7 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-black text-slate-950">Приклади речень</h2>
+          <h2 className="text-xl font-black text-slate-950 dark:text-slate-100">Приклади речень</h2>
           <Badge>{word.examples.length}/5</Badge>
         </div>
 
@@ -103,12 +103,12 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
               <Card key={example.kind}>
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="bg-sky-50 text-sky-800">{EXAMPLE_KIND_LABELS[example.kind]}</Badge>
+                    <Badge variant="sky">{EXAMPLE_KIND_LABELS[example.kind]}</Badge>
                     <Badge>{example.maxCefr}</Badge>
                   </div>
-                  <p className="text-lg font-bold text-slate-950">{example.text}</p>
-                  <p className="text-base text-slate-700">{example.translationUk}</p>
-                  <p className="text-sm leading-6 text-slate-600">{example.contextExplanationUk}</p>
+                  <p className="text-lg font-bold text-slate-950 dark:text-slate-100">{example.text}</p>
+                  <p className="text-base text-slate-700 dark:text-slate-300">{example.translationUk}</p>
+                  <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">{example.contextExplanationUk}</p>
                 </CardContent>
               </Card>
             ))}
@@ -124,7 +124,7 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
 
       <Card>
         <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
             Для повного release-контролю запусти strict validator: він перевірить IPA, переклади, 5 типів речень і джерела для кожного слова.
           </p>
           <Button asChild variant="secondary">
@@ -141,8 +141,8 @@ export function WordDetailClient({ word }: { word: WordEntry }) {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-      <span className="font-bold text-slate-950">{label}</span>
+    <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0 dark:border-slate-700">
+      <span className="font-bold text-slate-950 dark:text-slate-200">{label}</span>
       <span className="text-right">{value}</span>
     </div>
   );

@@ -70,9 +70,9 @@ export function TestsClient({ words }: { words: WordEntry[] }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-20 lg:pb-0">
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800/60">
         <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Practice testing</p>
-        <h1 className="mt-1 text-3xl font-black text-slate-950">Міні-тести</h1>
+        <h1 className="mt-1 text-3xl font-black text-slate-950 dark:text-slate-100">Міні-тести</h1>
         <div className="mt-4 max-w-xs">
           <Select value={kind} onChange={(event) => setKind(event.target.value as TestQuestionKind)}>
             <option value="multiple-choice">Вибір відповіді</option>
@@ -91,7 +91,7 @@ export function TestsClient({ words }: { words: WordEntry[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <p className="text-lg font-bold text-slate-950">{createQuestionPrompt(kind, word)}</p>
+          <p className="text-lg font-bold text-slate-950 dark:text-slate-100">{createQuestionPrompt(kind, word)}</p>
 
           {kind === "multiple-choice" ? (
             <div className="grid gap-2">
@@ -126,12 +126,12 @@ export function TestsClient({ words }: { words: WordEntry[] }) {
           )}
 
           {result !== null ? (
-            <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-              <p className="flex items-center gap-2 font-bold text-slate-950">
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+              <p className="flex items-center gap-2 font-bold text-slate-950 dark:text-slate-100">
                 {result ? <CheckCircle2 className="size-5 text-emerald-600" /> : <XCircle className="size-5 text-rose-600" />}
                 {result ? "Правильно" : "Потрібне повторення"}
               </p>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 Відповідь: <span className="font-semibold">{word.translationsUk.join(", ")}</span>
               </p>
               <Button type="button" className="mt-4" onClick={next}>

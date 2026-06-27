@@ -20,20 +20,20 @@ export function WordCard({
   const learned = Boolean(progress?.learned);
 
   return (
-    <article className="grid min-h-24 grid-cols-[1fr_auto] gap-3 border-b border-slate-100 bg-white px-4 py-3 transition hover:bg-slate-50">
+    <article className="grid min-h-24 grid-cols-[1fr_auto] gap-3 border-b border-slate-100 bg-white px-4 py-3 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-transparent dark:hover:bg-slate-800/50">
       <Link href={`/words/${word.slug}`} className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="truncate text-base font-black text-slate-950">{word.headword}</h2>
-          <Badge className="bg-emerald-50 text-emerald-800">{word.cefr}</Badge>
+          <h2 className="truncate text-base font-black text-slate-950 dark:text-slate-100">{word.headword}</h2>
+          <Badge variant="emerald">{word.cefr}</Badge>
           <Badge>{word.pos}</Badge>
-          {word.translationsUk.length === 0 ? <Badge className="bg-amber-50 text-amber-800">base</Badge> : null}
+          {word.translationsUk.length === 0 ? <Badge variant="amber">base</Badge> : null}
         </div>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           {word.translationsUk.length > 0 ? word.translationsUk.join(", ") : "Базовий CEFR-запис, очікує українське збагачення"}
         </p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {word.categories.slice(0, 3).map((category) => (
-            <span key={category} className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+            <span key={category} className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
               {category}
             </span>
           ))}

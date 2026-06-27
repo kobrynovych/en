@@ -1,116 +1,64 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ──────────────────────────────────────────────────────────
+   Strategy: CSS custom properties scoped to :root / html.dark.
+   All dark-mode styling is done with Tailwind dark: variants in components.
+   ────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  color-scheme: light;
+  --bg-base:     #f8fafc;  /* page canvas  */
+  --bg-surface:  #ffffff;  /* card / panel */
+  --bg-raised:   #f1f5f9;  /* thead, hover */
+  --bg-border:   #e2e8f0;  /* borders      */
+
+  --text-hi:     #0f172a;  /* headings     */
+  --text-body:   #374151;  /* body copy    */
+  --text-muted:  #6b7280;  /* captions     */
 }
 
-.dark {
-  --background: #020617;
-  --foreground: #e2e8f0;
-  color-scheme: dark;
+html.dark {
+  --bg-base:     #0d1117;
+  --bg-surface:  #161b22;
+  --bg-raised:   #1c2230;
+  --bg-border:   #30363d;
+
+  --text-hi:     #cdd9e5;
+  --text-body:   #adbac7;
+  --text-muted:  #768390;
 }
+
+/* ─── Map tokens to Tailwind theme ───────────────────────────────────────── */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-base);
+  color: var(--text-hi);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
-
-.dark .bg-white {
-  background-color: #0f172a;
-}
-
-.dark .bg-white\/95 {
-  background-color: rgb(2 6 23 / 0.95);
-}
-
-.dark .bg-slate-50 {
-  background-color: #020617;
-}
-
-.dark .bg-slate-100 {
-  background-color: #1e293b;
-}
-
-.dark .bg-slate-200 {
-  background-color: #334155;
-}
-
-.dark .border-slate-100,
-.dark .border-slate-200 {
-  border-color: #1e293b;
-}
-
-.dark .text-slate-950,
-.dark .text-slate-900 {
-  color: #f8fafc;
-}
-
-.dark .text-slate-800,
-.dark .text-slate-700 {
-  color: #cbd5e1;
-}
-
-.dark .text-slate-600,
-.dark .text-slate-500 {
-  color: #94a3b8;
-}
-
-.dark .hover\:bg-slate-50:hover,
-.dark .hover\:bg-slate-100:hover {
-  background-color: #1e293b;
-}
-
-.dark .hover\:text-slate-950:hover {
-  color: #ffffff;
-}
-
-.dark .bg-emerald-50 {
-  background-color: rgb(6 78 59 / 0.38);
-}
-
-.dark .bg-sky-50 {
-  background-color: rgb(12 74 110 / 0.38);
-}
-
-.dark .bg-amber-50 {
-  background-color: rgb(120 53 15 / 0.36);
-}
-
-.dark .text-emerald-800 {
-  color: #6ee7b7;
-}
-
-.dark .text-sky-800 {
-  color: #7dd3fc;
-}
-
-.dark .text-amber-800,
-.dark .text-amber-700 {
-  color: #fcd34d;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;

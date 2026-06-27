@@ -16,10 +16,10 @@ export function StatsClient({ words }: { words: StatsWordMeta[] }) {
 
   return (
     <div className="space-y-5 pb-20 lg:pb-0">
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-800/60">
         <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">Learning analytics</p>
-        <h1 className="mt-1 text-3xl font-black text-slate-950">Статистика</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <h1 className="mt-1 text-3xl font-black text-slate-950 dark:text-slate-100">Статистика</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
           Усі дані зберігаються локально в IndexedDB цього браузера.
         </p>
       </div>
@@ -43,8 +43,8 @@ export function StatsClient({ words }: { words: StatsWordMeta[] }) {
             {stats.levels.map((level) => (
               <div key={level.level}>
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-black text-slate-950">{level.level}</span>
-                  <span className="font-semibold text-slate-600">
+                  <span className="font-black text-slate-950 dark:text-slate-100">{level.level}</span>
+                  <span className="font-semibold text-slate-600 dark:text-slate-400">
                     {level.learned}/{level.total} · {level.progressPercent}%
                   </span>
                 </div>
@@ -62,8 +62,8 @@ export function StatsClient({ words }: { words: StatsWordMeta[] }) {
             {stats.categories.slice(0, 10).map((category) => (
               <div key={category.category}>
                 <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-                  <span className="font-bold capitalize text-slate-950">{category.category}</span>
-                  <span className="text-slate-600">
+                  <span className="font-bold capitalize text-slate-950 dark:text-slate-100">{category.category}</span>
+                  <span className="text-slate-600 dark:text-slate-400">
                     {category.learned}/{category.total}
                   </span>
                 </div>
@@ -83,7 +83,7 @@ export function StatsClient({ words }: { words: StatsWordMeta[] }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
               Очищення видалить позначки “вивчено”, історію повторень і результати тестів у цьому браузері.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -104,9 +104,9 @@ export function StatsClient({ words }: { words: StatsWordMeta[] }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-black text-slate-950">{value}</p>
+    <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/60">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-2 text-3xl font-black text-slate-950 dark:text-slate-100">{value}</p>
     </div>
   );
 }
