@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Tailwind CSS 4 defaults `dark:` to the operating-system media query.
+   The application uses an explicit class so the switch can override it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─── Design tokens ──────────────────────────────────────────────────────────
    Strategy: CSS custom properties scoped to :root / html.dark.
    All dark-mode styling is done with Tailwind dark: variants in components.

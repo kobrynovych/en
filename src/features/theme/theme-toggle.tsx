@@ -1,55 +1,73 @@
-"use client";
+﻿"use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/lib/cn";
 
 type Theme = "light" | "dark";
 const THEME_STORAGE_KEY = "english-path-theme";
 
-// ── Shared external store so all ThemeToggle instances stay in sync ─────────
-
-const listeners = new Set<() => void>();
-
-function notify() {
-  for (const fn of listeners) fn();
-}
-
-function getThemeSnapshot(): Theme {
-  if (typeof document === "undefined") return "dark";
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
-}
-
-function getThemeServerSnapshot(): Theme {
-  return "dark"; // safe SSR default — ThemeScript corrects it before paint
-}
-
-function subscribeTheme(callback: () => void) {
-  listeners.add(callback);
-  return () => { listeners.delete(callback); };
-}
-
 function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
   document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.themePreference = theme;
   try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch {}
-  notify();
+  window.dispatchEvent(new CustomEvent<Theme>("english-path-theme-change", { detail: theme }));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 export function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const [theme, setTheme] = useState<Theme>("light");
+  const [ready, setReady] = useState(false);
   const isDark = theme === "dark";
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
+
+    const initialTheme: Theme = stored === "light" || stored === "dark"
+      ? stored
+      : media.matches ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+    document.documentElement.dataset.theme = initialTheme;
+    document.documentElement.dataset.themePreference = stored === "light" || stored === "dark" ? stored : "system";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate browser-owned theme state
+    setTheme(initialTheme);
+    setReady(true);
+
+    const syncToggleInstances = (event: Event) => {
+      setTheme((event as CustomEvent<Theme>).detail);
+    };
+    const syncSystemTheme = () => {
+      let preference: string | null = null;
+      try { preference = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
+      if (preference !== "light" && preference !== "dark") {
+        const systemTheme: Theme = media.matches ? "dark" : "light";
+        document.documentElement.classList.toggle("dark", media.matches);
+        document.documentElement.dataset.theme = systemTheme;
+        document.documentElement.dataset.themePreference = "system";
+        setTheme(systemTheme);
+      }
+    };
+
+    window.addEventListener("english-path-theme-change", syncToggleInstances);
+    media.addEventListener("change", syncSystemTheme);
+    return () => {
+      window.removeEventListener("english-path-theme-change", syncToggleInstances);
+      media.removeEventListener("change", syncSystemTheme);
+    };
+  }, []);
+
   function toggle() {
-    applyTheme(isDark ? "light" : "dark");
+    const currentIsDark = document.documentElement.classList.contains("dark");
+    applyTheme(currentIsDark ? "light" : "dark");
   }
 
   return (
     <button
       type="button"
       onClick={toggle}
+      data-theme-ready={ready}
       aria-label={isDark ? "Перемкнути на світлу тему" : "Перемкнути на темну тему"}
       title={isDark ? "Перемкнути на світлу тему" : "Перемкнути на темну тему"}
       className={cn(
@@ -59,11 +77,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
         compact && "w-full",
       )}
     >
-      {isDark ? (
-        <Sun className="size-4" aria-hidden="true" />
-      ) : (
-        <Moon className="size-4" aria-hidden="true" />
-      )}
+      {isDark ? <Sun className="size-4" aria-hidden="true" /> : <Moon className="size-4" aria-hidden="true" />}
     </button>
   );
 }

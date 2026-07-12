@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BarChart3, BookMarked, BookOpen, Brain, ClipboardCheck, Layers3, Library, RotateCcw } from "lucide-react";
+import { BarChart3, BookMarked, BookOpen, Brain, ClipboardCheck, Headphones, Layers3, Library, RotateCcw } from "lucide-react";
 import { ThemeToggle } from "@/features/theme/theme-toggle";
 import { cn } from "@/shared/lib/cn";
 
@@ -10,6 +10,7 @@ const navItems = [
   { href: "/levels/A2", label: "A2", icon: Library },
   { href: "/levels/B1", label: "B1", icon: Library },
   { href: "/irregular-verbs", label: "Неправильні дієслова", icon: BookMarked },
+  { href: "/reading", label: "Читання", icon: Headphones },
   { href: "/practice/review", label: "Повторення", icon: RotateCcw },
   { href: "/practice/flashcards", label: "Картки", icon: Brain },
   { href: "/practice/tests", label: "Тести", icon: ClipboardCheck },
@@ -54,7 +55,7 @@ export function PageShell({ children, className }: { children: ReactNode; classN
         aria-label="Мобільна навігація"
       >
         <div className="mx-auto grid max-w-lg grid-cols-6 gap-1">
-          {navItems.slice(0, 6).map((item) => {
+          {[navItems[0], navItems[1], navItems[4], navItems[5], navItems[6], navItems[7]].map((item) => {
             const Icon = item.icon;
             return (
               <Link

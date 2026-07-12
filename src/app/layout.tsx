@@ -26,14 +26,13 @@ export default function RootLayout({
   return (
     <html
       lang="uk"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <ThemeScript />
-      </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
+        <ThemeScript />
       </body>
     </html>
   );
