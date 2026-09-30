@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRight, BarChart3, BookOpenCheck, Brain, ClipboardCheck, Database, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpenCheck, Brain, ClipboardCheck, Database, RotateCcw, Route, Sparkles } from "lucide-react";
 import { computeLearningStats, type StatsWordMeta } from "@/domain/learning/stats";
 import { useHydratedProgress, useProgressStore } from "@/features/progress/use-progress-store";
 import { Badge } from "@/shared/ui/badge";
@@ -36,11 +36,17 @@ export function HomeDashboard({
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400">
             Платформа поєднує CEFR-словник, активне пригадування, флеш-картки, міні-тести й локальне відстеження прогресу без облікового запису.
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Button asChild size="lg">
               <Link href="/levels/A1">
                 Почати з A1
                 <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary">
+              <Link href="/roadmap">
+                <Route className="size-4" aria-hidden="true" />
+                Дорожня карта
               </Link>
             </Button>
             <Button asChild size="lg" variant="secondary">

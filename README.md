@@ -39,6 +39,14 @@ Current strict coverage:
 
 Every released word has a Ukrainian translation, IPA field, CEFR level, category, part of speech, spelling data, and five example sentence records. Manual enrichment files override generated enrichment. The generated file `content/enrichment/auto-a1-b1.jsonl` is machine-assisted and should be gradually improved by adding reviewed entries to separate manual enrichment files.
 
+## Learning roadmap
+
+`/roadmap` is a study plan from zero (Pre-A1) to B2. Every level lists CEFR outcomes per skill, study hours, vocabulary size, the grammar and topics of the British Council / EAQUALS Core Inventory, pronunciation, listening, reading, speaking and writing tasks, typical mistakes of Ukrainian speakers, resources, and a checkpoint.
+
+- Content: `src/features/roadmap/content/` (one file per level).
+- Checklist progress is stored in `localStorage` under `english-path-roadmap-progress`, separately from the dictionary progress in IndexedDB.
+- Task ids are persisted: never rename an existing id, add a new task instead. Tasks marked `optional` (official exams and extras) do not count towards the percentage.
+
 ## Commands
 
 ```bash
@@ -78,7 +86,7 @@ Theme preference is stored in `localStorage` under `english-path-theme`. The def
 src/
   app/                    Next.js routes
   domain/learning/         framework-independent entities and rules
-  features/                vocabulary, progress, practice, stats UI
+  features/                vocabulary, progress, practice, stats, roadmap, navigation UI
   infrastructure/          content loaders and IndexedDB adapters
   shared/                  reusable UI and utilities
 content/
@@ -97,6 +105,9 @@ Progress is local-first: learned flags, Leitner boxes, review events, test sessi
 ## Sources
 
 - CEFR: https://www.coe.int/en/web/common-european-framework-reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale
+- British Council / EAQUALS Core Inventory for General English: https://www.teachingenglish.org.uk/article/british-council-eaquals-core-inventory-general-english
+- Cambridge English guided learning hours: https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours
+- Oxford 3000 and 5000: https://www.oxfordlearnersdictionaries.com/wordlists/oxford3000-5000
 - CEFR-J/Open Language Profiles: https://github.com/openlanguageprofiles/olp-en-cefrj
 - English Vocabulary Profile: https://englishprofile.org/?menu=english-vocabulary-profile
 - IPA dictionary package: https://github.com/Kotarski/ipa-dict

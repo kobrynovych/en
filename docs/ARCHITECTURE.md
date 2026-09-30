@@ -15,6 +15,14 @@
 3. Client Components hydrate IndexedDB progress through `useProgressStore`.
 4. Screens compute derived stats locally from dictionary data plus progress records.
 
+## Navigation
+
+`features/navigation/nav-config.ts` is the single list of site pages. `SiteHeader` renders it as a horizontal menu with dropdowns from `lg`, and as a burger button with a Radix Dialog drawer below `lg`; `MobileTabBar` shows five shortcuts on small screens. Add new pages to the config, not to the components.
+
+## Roadmap
+
+`features/roadmap` holds the zero-to-B2 study plan. Content is static TypeScript in `content/`, progress rules are pure functions in `progress.ts`, and `progress-store.ts` is a `useSyncExternalStore` store backed by `localStorage` that syncs between tabs.
+
 ## Content Expansion
 
 To add B2, C1, or C2:

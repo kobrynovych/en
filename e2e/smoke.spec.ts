@@ -66,8 +66,9 @@ test("sentence anchor stays on the final line when text wraps", async ({ page })
 
 test("home to word flow works", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "A1", exact: true }).first().click();
-  await expect(page.getByRole("heading", { name: "Словник A1" })).toBeVisible();
+  await page.getByRole("link", { name: "Почати з A1" }).click();
+  // The A1 dictionary page streams 1 000+ words, which takes a while on a busy dev server.
+  await expect(page.getByRole("heading", { name: "Словник A1" })).toBeVisible({ timeout: 20_000 });
 
   await page.getByPlaceholder("Пошук англійською або українською").fill("apple");
   await page.getByRole("link", { name: /apple/i }).first().click();
