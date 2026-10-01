@@ -31,6 +31,13 @@ function scrollBehavior(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
 
+/** The stage that contains a `#stage-…` or `#module-…` anchor. */
+function findLinkedStage(stages: RoadmapStage[], hash: string) {
+  return stages.find(
+    (stage) => hash === `#stage-${stage.id}` || stage.modules.some((roadmapModule) => hash === `#module-${roadmapModule.id}`),
+  );
+}
+
 export function RoadmapClient({ stages, principles, routine, sources }: RoadmapClientProps) {
   const { completed, hydrated, toggle, clear } = useRoadmapProgress();
   // null until the saved progress is known; then the learner's current stage is opened once.
@@ -48,10 +55,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
 
   useEffect(() => {
     if (!hydrated || expanded !== null) return;
-    const hash = window.location.hash;
-    const linkedStage = stages.find((stage) =>
-      hash === `#stage-${stage.id}` || stage.modules.some((module) => hash === `#module-${module.id}`),
-    );
+    const linkedStage = findLinkedStage(stages, window.location.hash);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- open the current (or linked) stage once saved progress is restored
     setExpanded(new Set([linkedStage?.id ?? currentStageId]));
   }, [hydrated, expanded, stages, currentStageId]);
@@ -62,6 +66,18 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
     const hash = window.location.hash;
     if (hash.startsWith("#module-")) document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" });
   }, [hydrated, expanded]);
+
+  // Hash changes without a reload (an edited address, browser history) must open the linked level as well.
+  useEffect(() => {
+    function revealHashTarget() {
+      const linkedStage = findLinkedStage(stages, window.location.hash);
+      if (!linkedStage) return;
+      flushSync(() => setExpanded((previous) => new Set(previous ?? [stages[0].id]).add(linkedStage.id)));
+      document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "start" });
+    }
+    window.addEventListener("hashchange", revealHashTarget);
+    return () => window.removeEventListener("hashchange", revealHashTarget);
+  }, [stages]);
 
   // On narrow screens the stage list scrolls horizontally: keep the current stage in view.
   useEffect(() => {

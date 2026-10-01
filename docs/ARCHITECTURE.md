@@ -23,6 +23,8 @@
 
 `features/roadmap` holds the zero-to-B2 study plan. Content is static TypeScript in `content/`, progress rules are pure functions in `progress.ts`, and `progress-store.ts` is a `useSyncExternalStore` store backed by `localStorage` that syncs between tabs.
 
+`ai-study.ts` turns a task into a study prompt and lists the AI assistants with their deep-link formats; `ai-study-menu.tsx` is the per-task disclosure (a popover from `sm`, a bottom sheet below). Opening an assistant copies the prompt synchronously with `copyTextSync` from `shared/lib/copy-text.ts`, because the new tab takes focus before the async Clipboard API resolves. `shared/lib/use-dismiss.ts` closes both this menu and the header dropdowns on outside click, Escape and focus loss.
+
 ## Content Expansion
 
 To add B2, C1, or C2:

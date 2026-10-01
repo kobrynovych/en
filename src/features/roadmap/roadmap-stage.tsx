@@ -30,6 +30,7 @@ import { Badge } from "@/shared/ui/badge";
 import { Progress } from "@/shared/ui/progress";
 import { SpeakButton } from "@/shared/ui/speak-button";
 import { cn } from "@/shared/lib/cn";
+import { AiStudyMenu } from "./ai-study-menu";
 import { getStageStatus, summarizeStage, summarizeTasks, type CompletedTasks, type StageStatus } from "./progress";
 import type {
   RoadmapLink,
@@ -157,7 +158,7 @@ export function StageSection({
     <section
       id={`stage-${stage.id}`}
       aria-labelledby={`stage-${stage.id}-title`}
-      className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
+      className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
     >
       <div className="relative p-4 sm:p-6">
         <div className="flex items-start gap-4">
@@ -268,6 +269,7 @@ export function StageSection({
             {stage.modules.map((module) => (
               <ModuleCard
                 key={module.id}
+                stage={stage}
                 module={module}
                 completed={completed}
                 hideCompleted={hideCompleted}
@@ -350,11 +352,13 @@ function ChipList({ title, items }: { title: string; items: string[] }) {
 }
 
 function ModuleCard({
+  stage,
   module,
   completed,
   hideCompleted,
   onToggleTask,
 }: {
+  stage: RoadmapStage;
   module: RoadmapModule;
   completed: CompletedTasks;
   hideCompleted: boolean;
@@ -374,7 +378,7 @@ function ModuleCard({
           <Icon className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 id={`module-${module.id}`} tabIndex={-1} className="scroll-mt-24 font-black text-slate-950 dark:text-white">
+          <h3 id={`module-${module.id}`} tabIndex={-1} className="font-black text-slate-950 dark:text-white">
             {module.title}
           </h3>
           {module.intro ? <p className="mt-0.5 text-sm leading-6 text-slate-600 dark:text-slate-400">{module.intro}</p> : null}
@@ -393,7 +397,14 @@ function ModuleCard({
       {tasks.length > 0 ? (
         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
           {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} done={Boolean(completed[task.id])} onToggle={onToggleTask} />
+            <TaskItem
+              key={task.id}
+              stage={stage}
+              roadmapModule={module}
+              task={task}
+              done={Boolean(completed[task.id])}
+              onToggle={onToggleTask}
+            />
           ))}
         </ul>
       ) : (
@@ -406,7 +417,15 @@ function ModuleCard({
   );
 }
 
-function TaskItem({ task, done, onToggle }: { task: RoadmapTask; done: boolean; onToggle: (taskId: string) => void }) {
+interface TaskItemProps {
+  stage: RoadmapStage;
+  roadmapModule: RoadmapModule;
+  task: RoadmapTask;
+  done: boolean;
+  onToggle: (taskId: string) => void;
+}
+
+function TaskItem({ stage, roadmapModule, task, done, onToggle }: TaskItemProps) {
   const inputId = useId();
   const detailsId = `${inputId}-details`;
 
@@ -455,7 +474,8 @@ function TaskItem({ task, done, onToggle }: { task: RoadmapTask; done: boolean; 
           {task.examples?.length ? (
             <ul className="mt-2 flex flex-wrap gap-x-2 gap-y-1" aria-label="Приклади">
               {task.examples.map((example) => (
-                <li key={example} className="flex items-center gap-1">
+                // min-h-8 reserves the speak button's height, so rows do not jump when it mounts after hydration.
+                <li key={example} className="flex min-h-8 items-center gap-1">
                   <span
                     lang="en"
                     className="rounded bg-slate-100 px-2 py-1 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200"
@@ -467,13 +487,12 @@ function TaskItem({ task, done, onToggle }: { task: RoadmapTask; done: boolean; 
               ))}
             </ul>
           ) : null}
-          {task.links?.length ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {task.links.map((link) => (
-                <RoadmapLinkChip key={link.href} link={link} />
-              ))}
-            </div>
-          ) : null}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <AiStudyMenu stage={stage} roadmapModule={roadmapModule} task={task} />
+            {task.links?.map((link) => (
+              <RoadmapLinkChip key={link.href} link={link} />
+            ))}
+          </div>
         </div>
       </div>
     </li>

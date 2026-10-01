@@ -47,6 +47,21 @@ Every released word has a Ukrainian translation, IPA field, CEFR level, category
 - Checklist progress is stored in `localStorage` under `english-path-roadmap-progress`, separately from the dictionary progress in IndexedDB.
 - Task ids are persisted: never rename an existing id, add a new task instead. Tasks marked `optional` (official exams and extras) do not count towards the percentage.
 
+### Study a task with AI
+
+Every task has a "Вивчити з ШІ" menu. It builds a Ukrainian study prompt from the level, section, task description and examples, with a lesson plan that depends on the module (grammar, vocabulary, pronunciation, listening, reading, speaking, writing, checkpoint), and opens the chosen assistant in a new tab. The prompt is also copied to the clipboard.
+
+| Assistant | Link | How the prompt arrives |
+| --- | --- | --- |
+| ChatGPT | `https://chatgpt.com/?q=` | sent automatically |
+| Perplexity | `https://www.perplexity.ai/search?q=` | sent automatically |
+| Claude | `https://claude.ai/new?q=` | pre-filled, the learner sends it |
+| Grok | `https://grok.com/?q=` | pre-filled with a confirmation |
+| Gemini | `https://gemini.google.com/app` | no URL parameter: pasted from the clipboard |
+| Copilot | `https://copilot.microsoft.com/?q=` | dropped for signed-out users: pasted from the clipboard |
+
+Behaviour was checked on 1 October 2026; these parameters are undocumented and may change. Prompts live in `src/features/roadmap/ai-study.ts`; a unit test keeps every prompt under 1,500 characters and every link under 7,500, because Cyrillic is percent-encoded into long URLs.
+
 ## Commands
 
 ```bash

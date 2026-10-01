@@ -49,6 +49,19 @@ test("stage sections expand and collapse", async ({ page }) => {
   await expect(page.getByRole("checkbox", { name: "Дієслово to be: am / is / are" })).toHaveCount(0);
 });
 
+test("module links open their level on load and after an in-page hash change", async ({ page }) => {
+  await page.goto("/roadmap/#module-a2-grammar");
+  await expect(page.locator("[data-hydrated]")).toHaveAttribute("data-hydrated", "true");
+  await expect(page.getByRole("button", { name: /A2 · Елементарний/ })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#module-a2-grammar")).toBeInViewport();
+
+  await page.evaluate(() => {
+    window.location.hash = "#module-b1-writing";
+  });
+  await expect(page.getByRole("button", { name: /B1 · Середній/ })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#module-b1-writing")).toBeInViewport();
+});
+
 test("site navigation reaches the roadmap", async ({ page, isMobile }) => {
   await page.goto("/");
 
@@ -75,6 +88,56 @@ test("mobile tab bar highlights the current section", async ({ page, isMobile })
   await tabs.getByRole("link", { name: "Словник" }).click();
   await expect(page).toHaveURL(/\/levels\/A1\/?$/, DICTIONARY_PAGE);
   await expect(tabs.getByRole("link", { name: "Словник" })).toHaveAttribute("aria-current", "page");
+});
+
+test("a task opens an AI assistant with a detailed study prompt", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  // Never hit the real services from tests.
+  await context.route(/^https:\/\/(chatgpt\.com|claude\.ai|gemini\.google\.com|www\.perplexity\.ai|copilot\.microsoft\.com|grok\.com)\//, (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>AI stub</title>" }),
+  );
+  await openRoadmap(page);
+
+  const task = page.locator("#task-start-setup-goal");
+  const trigger = task.getByRole("button", { name: `Вивчити з ШІ: ${FIRST_TASK}` });
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(trigger).toBeFocused();
+
+  await trigger.click();
+  const chatgpt = task.getByRole("link", { name: /ChatGPT/ });
+  const prompt = new URL((await chatgpt.getAttribute("href")) ?? "").searchParams.get("q");
+  expect(prompt).toContain(`Пункт: ${FIRST_TASK}.`);
+  expect(prompt).toContain("Мій рівень: Pre-A1");
+  await expect(task.getByRole("link", { name: /Gemini/ })).toHaveAttribute("href", "https://gemini.google.com/app");
+
+  const popupPromise = context.waitForEvent("page");
+  await chatgpt.click();
+  const popup = await popupPromise;
+  await expect(popup).toHaveURL(/^https:\/\/chatgpt\.com\/\?q=/);
+  await popup.close();
+
+  await page.bringToFront();
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(prompt);
+});
+
+test("the AI prompt can be copied and reviewed", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await openRoadmap(page);
+
+  const task = page.locator("#task-start-phrases-greetings");
+  await task.getByRole("button", { name: /Вивчити з ШІ/ }).click();
+  await task.getByRole("button", { name: "Скопіювати запит" }).click();
+  await expect(task.getByRole("button", { name: "Запит скопійовано" })).toBeVisible();
+
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain("Пункт: Привітання й знайомство.");
+  expect(copied).toContain("Приклади з плану: Hi! My name is Olena.");
+
+  await task.getByText("Переглянути запит").click();
+  await expect(task.locator("pre")).toContainText("Пункт: Привітання й знайомство.");
 });
 
 test("desktop dropdown opens dictionary levels", async ({ page, isMobile }) => {

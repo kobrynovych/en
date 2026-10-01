@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { BookOpen, ChevronDown, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/features/theme/theme-toggle";
 import { cn } from "@/shared/lib/cn";
+import { useDismiss } from "@/shared/lib/use-dismiss";
 import {
   MENU_SECTIONS,
   PRIMARY_NAV,
@@ -91,30 +92,8 @@ function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string })
   const panelId = useId();
   const active = isGroupActive(pathname, group);
   const Icon = group.icon;
-
-  useEffect(() => {
-    if (!open) return;
-
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      buttonRef.current?.focus();
-    };
-
-    document.addEventListener("pointerdown", closeOnOutsidePointer);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOnOutsidePointer);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [open]);
-
-  function closeWhenFocusLeaves(event: FocusEvent<HTMLDivElement>) {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
-  }
+  const close = useCallback(() => setOpen(false), []);
+  const closeWhenFocusLeaves = useDismiss({ open, onDismiss: close, containerRef, triggerRef: buttonRef });
 
   return (
     <div ref={containerRef} className="relative" onBlur={closeWhenFocusLeaves}>
