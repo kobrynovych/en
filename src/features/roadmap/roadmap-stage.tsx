@@ -223,10 +223,20 @@ export function StageSection({
               value={stage.stageHours}
               hint={stage.totalHours === stage.stageHours ? undefined : `Разом від нуля: ${stage.totalHours}`}
             />
-            <Fact icon={CalendarDays} label="Темп" value={stage.pace} />
-            <Fact icon={BookA} label="Словниковий запас" value={stage.vocabulary} />
-            <Fact icon={GraduationCap} label="Підтвердження рівня" value={stage.certification} />
+            <Fact icon={CalendarDays} label="Темп цього етапу" value={stage.pace} />
+            <Fact icon={BookA} label="Лексичний орієнтир" value={stage.vocabulary} />
+            <Fact icon={GraduationCap} label="Перевірка рівня" value={stage.certification} />
           </dl>
+
+          <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-800/60">
+            <SubsectionTitle>Як проходити цей рівень</SubsectionTitle>
+            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700 dark:text-slate-300">
+              {stage.learningPath.map((step) => <li key={step}>{step}</li>)}
+            </ol>
+            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+              На кожному кроці поєднуйте слухання, читання, говоріння й письмо. Теми нижче — довідник для цього маршруту.
+            </p>
+          </div>
 
           <Outcomes stage={stage} />
 
@@ -238,9 +248,21 @@ export function StageSection({
           {status === "done" ? (
             <p className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
               <CircleCheck className="size-5 shrink-0" aria-hidden="true" />
-              Етап завершено! Можна переходити до наступного рівня.
+              Чекліст етапу завершено. Оцініть навички за контрольною точкою й повторіть те, що ще потребує практики.
             </p>
           ) : null}
+
+          <nav aria-label={`Розділи ${stage.code}`} className="flex flex-wrap gap-2">
+            {stage.modules.map((module) => (
+              <a
+                key={module.id}
+                href={`#module-${module.id}`}
+                className={cn("rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 dark:border-slate-700 dark:text-emerald-400 dark:hover:bg-emerald-950/50", focusRing)}
+              >
+                {module.title}
+              </a>
+            ))}
+          </nav>
 
           <div className="space-y-4">
             {stage.modules.map((module) => (
@@ -352,7 +374,7 @@ function ModuleCard({
           <Icon className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 id={`module-${module.id}`} className="font-black text-slate-950 dark:text-white">
+          <h3 id={`module-${module.id}`} tabIndex={-1} className="scroll-mt-24 font-black text-slate-950 dark:text-white">
             {module.title}
           </h3>
           {module.intro ? <p className="mt-0.5 text-sm leading-6 text-slate-600 dark:text-slate-400">{module.intro}</p> : null}

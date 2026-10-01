@@ -48,6 +48,10 @@ describe("roadmap content", () => {
       for (const field of [stage.summary, stage.stageHours, stage.totalHours, stage.pace, stage.vocabulary, stage.certification]) {
         expect(field.trim()).not.toBe("");
       }
+      expect(stage.learningPath.length).toBeGreaterThanOrEqual(3);
+      for (const step of stage.learningPath) {
+        expect(step.trim()).not.toBe("");
+      }
       expect(stage.outcomes.map((outcome) => outcome.skill)).toEqual(
         expect.arrayContaining(["interaction", "production", "listening", "reading", "writing"]),
       );
@@ -104,6 +108,7 @@ describe("roadmap content", () => {
       stage.outcomes.forEach((outcome) => expectUnique(outcome.items));
       expectUnique(stage.functions);
       expectUnique(stage.topics);
+      expectUnique(stage.learningPath);
     }
     expectUnique(ROADMAP_SOURCES.map((source) => source.label));
   });

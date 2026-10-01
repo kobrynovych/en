@@ -11,9 +11,14 @@ export const STAGE_A2: RoadmapStage = {
     "Ви розумієте речення й часто вживані вирази на близькі теми: сім’я, покупки, місцевість, робота. Спілкуєтеся в простих звичних ситуаціях, де потрібен прямий обмін інформацією. Простими словами описуєте своє минуле, оточення й нагальні потреби.",
   stageHours: "≈ 90–100 год",
   totalHours: "≈ 180–200 год",
-  pace: "3–4 місяці при 1 год на день",
-  vocabulary: "≈ 1500–2000 слів (Oxford 3000: ще 800 слів рівня A2)",
-  certification: "Cambridge A2 Key (KET)",
+  pace: "≈ 13–15 тижнів по 7 год на тиждень",
+  vocabulary: "≈ 1500–2000 слів і фраз загалом; добірки A1–A2",
+  certification: "Пробні завдання A2 Key; офіційний іспит — за бажанням",
+  learningPath: [
+    "Минулий досвід: повторіть A1, поєднайте Past Simple / Continuous і почніть Present Perfect. Розкажіть про поїздку.",
+    "Плани й побутові рішення: майбутні форми, модальні дієслова, порівняння та кількість. Розіграйте бронювання й домовленість.",
+    "Зв’язна розповідь: умовні речення, дієслівні конструкції й часові зв’язки. Напишіть повідомлення та історію; перевірте чотири навички.",
+  ],
   outcomes: [
     {
       skill: "interaction",
@@ -67,7 +72,7 @@ export const STAGE_A2: RoadmapStage = {
     "Прохання",
     "Пропозиції",
   ],
-  topics: ["Освіта", "Хобі та дозвілля", "Подорожі й відпустка", "Покупки й послуги", "Робота"],
+  topics: ["Освіта", "Хобі та дозвілля", "Подорожі й відпустка", "Покупки й послуги", "Робота", "Здоров’я", "Дім і погода"],
   pitfalls: [
     {
       wrong: "I have seen him yesterday.",
@@ -112,6 +117,18 @@ export const STAGE_A2: RoadmapStage = {
       title: "Граматика",
       intro: "Теми A2 за British Council / EAQUALS Core Inventory: минуле, досвід, майбутнє й модальні дієслова.",
       tasks: [
+        {
+          id: "a2-grammar-pronouns",
+          title: "Неозначені, присвійні та зворотні займенники",
+          details: "someone / anyone / no one, something / anything / nothing, everyone / everything; mine / yours / hers замість повтору іменника; myself / yourself для дії на себе. Відпрацюйте їх у коротких побутових діалогах.",
+          examples: ["Is anyone at home?", "This bag is mine.", "I made it myself."],
+        },
+        {
+          id: "a2-grammar-present-states",
+          title: "Present Simple / Continuous і дієслова стану",
+          details: "Порівняйте звичку й тимчасову дію. know, want, need, like зазвичай уживаються у Simple, коли описують стан. Ствердження, запитання й заперечення тренуйте разом.",
+          examples: ["I usually work at home, but today I'm working in a café.", "I need help. Do you know the answer?"],
+        },
         {
           id: "a2-grammar-past",
           title: "Past Simple впевнено, запитання про минуле",
@@ -418,11 +435,17 @@ export const STAGE_A2: RoadmapStage = {
           examples: ["I'm going to start a new course in September.", "What are you doing tonight?"],
         },
         {
+          id: "a2-speaking-relay",
+          title: "Передайте практичну інформацію",
+          details: "Прочитайте коротке оголошення про зміну розкладу й поясніть партнерові, що змінилося. Збережіть правильні час, місце та дію; за потреби перечитайте.",
+          examples: ["The shop closes at six today, so we need to go earlier."],
+        },
+        {
           id: "a2-speaking-partner",
           title: "Перші розмови з живим співрозмовником",
           details:
             "Викладач, розмовний клуб або мовний обмін — хоча б 30 хвилин на тиждень. Готуйте теми й запитання заздалегідь.",
-          links: [EXTERNAL.italki, EXTERNAL.tandem],
+          links: [bcSkill("speaking", "a2"), EXTERNAL.italki, EXTERNAL.tandem],
         },
       ],
     },
@@ -433,8 +456,9 @@ export const STAGE_A2: RoadmapStage = {
       tasks: [
         {
           id: "a2-writing-note",
-          title: "Коротке повідомлення з трьома пунктами (25–35 слів)",
-          details: "Як в A2 Key: відповісти другові, розкрити три задані пункти, правильно почати й завершити.",
+          title: "Коротке повідомлення з трьома пунктами (25+ слів)",
+          details: "Практика формату A2 Key: дайте відповідь на всі три пункти завдання. У чаті домовтеся про зустріч і відреагуйте на зміну часу; перечитайте повідомлення й уточніть незрозуміле.",
+          links: [bcSkill("writing", "a2")],
           examples: ["Hi Sam, I'm sorry I can't come on Saturday. My mum is ill. Can we meet on Sunday instead? Love, Kate"],
         },
         {
@@ -459,7 +483,7 @@ export const STAGE_A2: RoadmapStage = {
       id: "a2-checkpoint",
       kind: "checkpoint",
       title: "Контрольна точка",
-      intro: "Переходьте до B1, коли впевнено виконуєте обов’язкові завдання.",
+      intro: "Оцініть читання, слухання, письмо й діалог окремо. Простих зв’язаних речень достатньо; паузи й прохання повторити допустимі. Після виправлень спробуйте нове схоже завдання.",
       tasks: [
         {
           id: "a2-checkpoint-self",
@@ -469,13 +493,19 @@ export const STAGE_A2: RoadmapStage = {
         {
           id: "a2-checkpoint-mock",
           title: "Пробний тест A2 Key",
-          details: "Виконайте безкоштовні зразки завдань з читання, письма й аудіювання на сайті Cambridge.",
-          links: [EXTERNAL.keyPreparation],
+          details: "Пройдіть усі частини за інструкціями зразка. Читання й слухання перевірте за ключами, письмо й говоріння — за критеріями з відгуком викладача. Для офіційних пробних матеріалів A2 Key орієнтир A2 на Cambridge English Scale — 120; це не відсотки. Збережіть окремі результати навичок.",
+          links: [EXTERNAL.keyPreparation, EXTERNAL.cambridgeScores],
         },
         {
           id: "a2-checkpoint-talk",
           title: "5-хвилинна розмова про минуле й плани",
-          details: "З викладачем чи партнером: вихідні, робота, плани на відпустку — без підготовленого тексту.",
+          details: "Обговоріть вихідні й плани, поставте власні запитання та домовтеся про зустріч. Можна перепитувати й робити паузи. Успіх — ви обмінялися потрібною інформацією та погодили деталі.",
+        },
+        {
+          id: "a2-checkpoint-write",
+          title: "Повідомлення й коротка історія з перевіркою",
+          details: "Напишіть повідомлення від 25 слів і історію за картинками від 35 слів у форматі A2 Key. Перевірте всі пункти, послідовність подій і зрозумілість; після відгуку переробіть текст.",
+          links: [EXTERNAL.keyPreparation, bcSkill("writing", "a2")],
         },
         {
           id: "a2-checkpoint-exam",

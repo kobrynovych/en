@@ -11,9 +11,14 @@ export const STAGE_A1: RoadmapStage = {
     "Ви розумієте та вживаєте знайомі повсякденні вирази й найпростіші фрази для конкретних потреб. Можете представитися й представити інших, запитати та відповісти про особисте: де людина живе, кого знає, що має. Спілкуєтеся на простому рівні, якщо співрозмовник говорить повільно, чітко й готовий допомогти.",
   stageHours: "≈ 70 год",
   totalHours: "≈ 90–100 год",
-  pace: "2,5–3 місяці при 1 год на день",
-  vocabulary: "≈ 700–1000 слів (Oxford 3000: 900 слів рівня A1)",
-  certification: "Онлайн-тест рівня: EF SET або Cambridge «Test your English»",
+  pace: "≈ 10 тижнів по 7 год на тиждень",
+  vocabulary: "≈ 700–1000 слів і фраз загалом; добірка A1 з Oxford 3000",
+  certification: "Завдання з чотирьох навичок; онлайн-тест як додатковий орієнтир",
+  learningPath: [
+    "Я та моє оточення: to be, займенники, артиклі, have got, there is / are. Представте себе й опишіть кімнату.",
+    "Мій день: Present Simple / Continuous, запитання, can, час і кількість. Замовте їжу та домовтеся про просту зустріч.",
+    "Учора й завтра: Past Simple, going to, порівняння. Напишіть коротке повідомлення й виконайте контрольні завдання.",
+  ],
   outcomes: [
     {
       skill: "interaction",
@@ -64,7 +69,7 @@ export const STAGE_A1: RoadmapStage = {
     "Числа",
     "Ціни",
   ],
-  topics: ["Сім’я", "Хобі та дозвілля", "Відпочинок", "Покупки", "Робота й професії"],
+  topics: ["Сім’я", "Дім", "Одяг і погода", "Їжа", "Хобі та дозвілля", "Відпочинок", "Покупки", "Робота й професії"],
   pitfalls: [
     {
       wrong: "She a doctor.",
@@ -117,7 +122,7 @@ export const STAGE_A1: RoadmapStage = {
           id: "a1-grammar-pronouns",
           title: "Займенники й присвійний відмінок 's",
           details:
-            "Особові (I, me) і присвійні (my, your, his, her, its, our, their) займенники та 's для власності: Anna's bag. Не плутайте its («його» для предметів) з it's (it is).",
+            "Підмет: I, you, he, she, it, we, they; додаток: me, you, him, her, it, us, them. Перед іменником — my, your, his, her, its, our, their; 's позначає власника: Anna's bag. Не плутайте its та it's (it is).",
           examples: ["This is my brother. His name is Max.", "It's Kate's phone.", "Their house is big."],
           links: [bcGrammar("possessive 's", "a1-a2/possessive-s")],
         },
@@ -125,7 +130,7 @@ export const STAGE_A1: RoadmapStage = {
           id: "a1-grammar-articles",
           title: "Артиклі a / an / the і множина іменників",
           details:
-            "a / an — один з багатьох (a book, an apple), the — конкретний, уже відомий предмет. Множина: -s / -es і винятки man – men, child – children, person – people.",
+            "a / an — один з багатьох, the — конкретний, уже відомий предмет. a / an обираємо за звуком: a university, an hour. Множина: -s / -es і винятки man – men, child – children, person – people.",
           examples: ["I have an apple.", "The apple is red.", "Two children and three women."],
           links: [bcGrammar("articles", "a1-a2-grammar/articles-a-an-the")],
         },
@@ -264,7 +269,7 @@ export const STAGE_A1: RoadmapStage = {
           id: "a1-vocabulary-dictionary",
           title: "Пройдіть словник A1 на сайті",
           details:
-            "У словнику сайту понад 1 100 слів рівня A1 з перекладом, транскрипцією й прикладами. Мета рівня — активно вживати щонайменше 500–700 найчастотніших із них.",
+            "Добирайте слова A1 до поточної теми з перекладом, аудіо й прикладами. Для кожного складіть власну фразу та перевірте, чи можете згадати його без підказки. Обсяг словника сайту не є вимогою для переходу на A2.",
           links: [SITE.dictionaryA1, SITE.flashcards, SITE.review],
         },
         {
@@ -308,6 +313,12 @@ export const STAGE_A1: RoadmapStage = {
           examples: ["I need to buy some bread.", "We live in a small flat."],
         },
         {
+          id: "a1-vocabulary-home-clothes",
+          title: "Дім, одяг, погода й частини тіла",
+          details: "Кімнати, базові меблі, повсякденний одяг, погода та частини тіла: bedroom, table, coat, shoes, sunny, cold, head, hand. Опишіть кімнату й скажіть, що вдягнете сьогодні.",
+          examples: ["My coat is on the chair.", "It's cold today. I need a warm jacket."],
+        },
+        {
           id: "a1-vocabulary-hobbies",
           title: "Хобі та вільний час",
           details: "play football, go swimming, listen to music, watch films, read books, travel.",
@@ -323,7 +334,7 @@ export const STAGE_A1: RoadmapStage = {
         {
           id: "a1-pronunciation-vowels",
           title: "Довгі й короткі голосні",
-          details: "Довжина голосного змінює значення: ship /ɪ/ – sheep /iː/, live – leave, full /ʊ/ – fool /uː/.",
+          details: "Відрізняються і якість, і тривалість голосного: ship /ɪ/ – sheep /iː/, live – leave, full /ʊ/ – fool /uː/. Порівнюйте з аудіо, а не лише розтягуйте звук.",
           examples: ["ship – sheep", "live – leave", "full – fool"],
         },
         {
@@ -443,10 +454,17 @@ export const STAGE_A1: RoadmapStage = {
           examples: ["Excuse me, where is the station?", "Go straight on and turn left.", "It's opposite the bank."],
         },
         {
+          id: "a1-speaking-relay",
+          title: "Передайте час і місце зустрічі",
+          details: "Прочитайте просте запрошення й повідомте партнерові, де та коли зустріч. Можна підглядати; головне — правильно передати місце й час.",
+          examples: ["The meeting is at four, at the café."],
+        },
+        {
           id: "a1-speaking-record",
           title: "Щотижневий самозапис",
           details:
-            "Раз на тиждень записуйте 1–2 хвилини мовлення на знайому тему. Через місяць порівняйте записи — прогрес буде чутно.",
+            "Раз на тиждень запишіть коротку розповідь і розіграйте діалог із партнером чи викладачем. Попросіть назвати одну зрозумілу й одну складну фразу. Самозапис доповнює практику взаємодії.",
+          links: [bcSkill("speaking", "a1")],
         },
       ],
     },
@@ -470,7 +488,8 @@ export const STAGE_A1: RoadmapStage = {
         {
           id: "a1-writing-message",
           title: "Коротке повідомлення або листівка (20–30 слів)",
-          details: "Привітання, де ви, що робите, прощання.",
+          details: "Привітання, де ви, що робите, прощання. Потренуйте також коротку відповідь у чаті: подякуйте й дайте відповідь на просте запитання; можна користуватися зразком.",
+          links: [bcSkill("writing", "a1")],
           examples: ["Hi Tom! I'm in Odesa. The weather is great and the sea is warm. See you soon! Anna"],
         },
       ],
@@ -479,19 +498,20 @@ export const STAGE_A1: RoadmapStage = {
       id: "a1-checkpoint",
       kind: "checkpoint",
       title: "Контрольна точка",
-      intro: "Переходьте до A2, коли впевнено виконуєте ці завдання.",
+      intro: "Перевірте всі чотири навички. На A1 нормальні короткі фрази, паузи, повторення й допомога співрозмовника. Повторіть завдання на іншому матеріалі через кілька днів. Числа нижче — тренувальні орієнтири цієї карти.",
       tasks: [
         {
           id: "a1-checkpoint-self",
           title: "Самооцінка за переліком «Що ви зможете»",
-          details: "Пройдіться по кожному пункту на початку рівня й чесно оцініть: чи можете ви це без підготовки?",
+          details: "Для кожного вміння з початку рівня наведіть власний приклад. Збережіть короткий текст і запис розмови; позначте, що виходить самостійно, а що — лише зі зразком.",
         },
         {
           id: "a1-checkpoint-test",
-          title: "Онлайн-тест: результат A1 або вище",
+          title: "Додаткова діагностика A1",
           details:
-            "Пройдіть безкоштовний тест і збережіть результат. Якщо якась навичка слабша, поверніться до відповідного модуля.",
+            "Збережіть результат онлайн-тесту й перевірте перелік оцінених навичок. Він доповнює практичні завдання нижче; окремий тест слів чи граматики не підтверджує весь рівень.",
           links: [EXTERNAL.efset, EXTERNAL.cambridgeTest],
+          optional: true,
         },
         {
           id: "a1-checkpoint-words",
@@ -501,9 +521,27 @@ export const STAGE_A1: RoadmapStage = {
         },
         {
           id: "a1-checkpoint-talk",
-          title: "2 хвилини про свій день без підготовки",
+          title: "Коротка розповідь і діалог про себе",
           details:
-            "Запишіть монолог «Мій звичайний день» і прослухайте: чи правильні форми дієслів, чи зрозуміла вимова?",
+            "Розкажіть про свій день приблизно хвилину, дайте відповіді на п’ять простих запитань і поставте свої. Партнер може говорити повільно й повторювати. Перевірте, чи він зрозумів головні факти.",
+        },
+        {
+          id: "a1-checkpoint-listen",
+          title: "Аудіювання: зрозумійте короткий діалог A1",
+          details: "Прослухайте новий повільний діалог двічі без тексту. Визначте, хто говорить, про що йдеться, і дві деталі. Потім перевірте за транскриптом та повторіть складний фрагмент.",
+          links: [bcSkill("listening", "a1")],
+        },
+        {
+          id: "a1-checkpoint-read",
+          title: "Читання: знайдіть інформацію в повідомленні",
+          details: "У новому короткому тексті A1 знайдіть ім’я, місце й час або ціну. Можна перечитати; спершу спробуйте без перекладача всього тексту, потім перевірте відповіді.",
+          links: [bcSkill("reading", "a1")],
+        },
+        {
+          id: "a1-checkpoint-write",
+          title: "Письмо: анкета й повідомлення на 20–30 слів",
+          details: "Заповніть анкету й напишіть другові, де ви та що робите. Перевірте великі літери, крапки й форми to be. Попросіть партнера сказати, яку інформацію він зрозумів; виправте неясні місця.",
+          links: [bcSkill("writing", "a1")],
         },
       ],
     },

@@ -11,9 +11,14 @@ export const STAGE_B1: RoadmapStage = {
     "Ви розумієте основний зміст чіткого стандартного мовлення на знайомі теми: робота, навчання, дозвілля. Впораєтеся з більшістю ситуацій під час подорожі країною, де говорять англійською. Складаєте простий зв’язний текст на знайомі теми, описуєте враження, події, мрії та плани, коротко пояснюєте свої думки.",
   stageHours: "≈ 170–200 год",
   totalHours: "≈ 350–400 год",
-  pace: "6–7 місяців при 1 год на день",
-  vocabulary: "≈ 2500–3000 слів (Oxford 3000: ще 700 слів рівня B1)",
-  certification: "Cambridge B1 Preliminary (PET), IELTS 4.0–5.0",
+  pace: "≈ 24–29 тижнів по 7 год на тиждень",
+  vocabulary: "≈ 2500–3000 слів і фраз загалом; колокації та словотвір",
+  certification: "Пробні завдання B1 Preliminary; офіційний іспит — за бажанням",
+  learningPath: [
+    "Досвід і розповіді: Present Perfect / Past Simple, тривалі й розповідні часи, used to. Розкажіть історію та поясніть почуття.",
+    "Думки й рішення: умовні речення, модальні дієслова, пасив і непряма мова. Обговоріть проблему й запропонуйте рішення.",
+    "Зв’язність і самостійність: підрядні речення, зв’язки й перефразування. Підготуйте презентацію, email і короткий переказ; перевірте навички.",
+  ],
   outcomes: [
     {
       skill: "interaction",
@@ -68,7 +73,7 @@ export const STAGE_B1: RoadmapStage = {
     "Початок і завершення розмови",
     "Керування розмовою: перебити, змінити тему, повернутися",
   ],
-  topics: ["Книги й література", "Освіта", "Кіно", "Дозвілля", "Медіа", "Новини, стиль життя, актуальні події"],
+  topics: ["Книги й література", "Освіта", "Кіно", "Дозвілля", "Медіа", "Робота й кар’єра", "Здоров’я і стосунки", "Довкілля й технології", "Новини та стиль життя"],
   pitfalls: [
     {
       wrong: "I live here since 2020.",
@@ -78,7 +83,7 @@ export const STAGE_B1: RoadmapStage = {
     {
       wrong: "She asked where do I live.",
       right: "She asked where I lived.",
-      note: "У непрямих запитаннях — прямий порядок слів без do / did і зсув часів.",
+      note: "У непрямому запитанні — порядок слів як у твердженні. Після asked час часто зсувається в минуле; у ввічливому запитанні Can you tell me where you live? такого зсуву немає.",
     },
     {
       wrong: "If I would have time, I would travel.",
@@ -219,6 +224,12 @@ export const STAGE_B1: RoadmapStage = {
           ],
         },
         {
+          id: "b1-grammar-indirect-questions",
+          title: "Ввічливі непрямі запитання",
+          details: "Could you tell me…? / Do you know…? + підмет + присудок. Для запитання без питального слова використовуйте if / whether. Порівняйте пряме й непряме запитання та потренуйте запит інформації.",
+          examples: ["Where does the bus stop? — Could you tell me where the bus stops?", "Do you know if the shop is open?"],
+        },
+        {
           id: "b1-grammar-question-tags",
           title: "Розділові запитання (question tags)",
           details:
@@ -279,7 +290,7 @@ export const STAGE_B1: RoadmapStage = {
         {
           id: "b1-vocabulary-dictionary",
           title: "Пройдіть словник B1 на сайті",
-          details: "Близько 2 400 слів рівня B1. Вчіть їх разом із прикладами й перевіряйте себе в тестах.",
+          details: "Працюйте зі словами B1 за темою поточного модуля. Додавайте типові сполучення, перевіряйте впізнавання в тексті та вживання у власній розповіді. Вивчення всіх записів словника не є умовою переходу до B2.",
           links: [SITE.dictionaryB1, SITE.tests],
         },
         {
@@ -310,9 +321,9 @@ export const STAGE_B1: RoadmapStage = {
         },
         {
           id: "b1-vocabulary-topics",
-          title: "Теми B1: медіа, кіно, книги, освіта, робота",
+          title: "Теми B1: робота, культура й повсякденні проблеми",
           details:
-            "Лексика, щоб обговорювати новини, фільми, книжки, навчання й кар’єру: plot, review, headline, apply for a job, degree.",
+            "Новини, фільми, навчання й кар’єра: plot, review, headline, apply for a job, degree. Додайте здоров’я, стосунки, довкілля й побутові технології: keep fit, get along, recycle, online privacy. Для кожної теми поясніть проблему, причину й можливе рішення.",
           examples: ["The plot was really exciting.", "She applied for a job in marketing."],
         },
         {
@@ -465,11 +476,17 @@ export const STAGE_B1: RoadmapStage = {
           examples: ["It's a thing you use to open bottles.", "It's a kind of bird that can't fly."],
         },
         {
+          id: "b1-speaking-relay",
+          title: "Поясніть зміст повідомлення іншій людині",
+          details: "Знайдіть у листі чи інструкції потрібні партнеру деталі й передайте їх своїми словами. Відокремте факти від власних порад і перевірте, чи вас зрозуміли.",
+          examples: ["The email says we need to confirm by Friday. It doesn't mention the price."],
+        },
+        {
           id: "b1-speaking-practice",
           title: "Розмовна практика 1–2 рази на тиждень",
           details:
             "Викладач, розмовний клуб або мовний обмін. Після кожної розмови записуйте 3 нові фрази й 3 свої помилки.",
-          links: [EXTERNAL.italki, EXTERNAL.tandem],
+          links: [bcSkill("speaking", "b1"), EXTERNAL.italki, EXTERNAL.tandem],
         },
       ],
     },
@@ -501,11 +518,17 @@ export const STAGE_B1: RoadmapStage = {
           details: "Тематичне речення → пояснення й приклади → висновок. Один абзац — одна думка.",
         },
         {
+          id: "b1-writing-online",
+          title: "Онлайн-обговорення й уточнення",
+          details: "Напишіть коментар на знайому тему: власний досвід, думка й причина. Дайте відповідь на інший коментар і ввічливо уточніть незрозумілу деталь. Для практики достатньо навчального чату або чернетки діалогу.",
+          examples: ["I had a similar experience. Do you mean that the course is entirely online?"],
+        },
+        {
           id: "b1-writing-feedback",
           title: "Зворотний зв’язок на тексти",
           details:
             "Перевіряйте тексти в безкоштовному Write & Improve від Cambridge або з викладачем і ведіть список власних типових помилок.",
-          links: [EXTERNAL.writeAndImprove],
+          links: [bcSkill("writing", "b1"), EXTERNAL.writeAndImprove],
         },
       ],
     },
@@ -513,7 +536,7 @@ export const STAGE_B1: RoadmapStage = {
       id: "b1-checkpoint",
       kind: "checkpoint",
       title: "Контрольна точка",
-      intro: "Переходьте до B2, коли впевнено виконуєте обов’язкові завдання.",
+      intro: "Перевіряйте навички на нових матеріалах знайомої тематики. На B1 важливі зрозумілий зв’язний виклад і самостійне розв’язання побутових ситуацій; паузи й окремі помилки допустимі.",
       tasks: [
         {
           id: "b1-checkpoint-self",
@@ -523,19 +546,25 @@ export const STAGE_B1: RoadmapStage = {
         {
           id: "b1-checkpoint-mock",
           title: "Пробний тест B1 Preliminary",
-          details: "Виконайте зразки завдань з усіх частин: читання, письмо, аудіювання й говоріння.",
-          links: [EXTERNAL.preliminaryPreparation],
+          details: "Виконайте всі частини за часом та інструкціями зразка. Звірте ключі, отримайте оцінку письма й говоріння за критеріями Cambridge. Для офіційних пробних матеріалів B1 Preliminary орієнтир B1 на Cambridge English Scale — 140. Збережіть окремі результати та повторіть слабкі теми.",
+          links: [EXTERNAL.preliminaryPreparation, EXTERNAL.cambridgeScores],
         },
         {
           id: "b1-checkpoint-talk",
           title: "10-хвилинна розмова без підготовки",
           details:
-            "Знайома тема на вибір співрозмовника: робота, подорожі, фільм. Мета — говорити без довгих пауз і переходу на українську.",
+            "Знайома тема на вибір партнера: робота, подорожі, фільм. Розкажіть про досвід, поясніть думку, поставте уточнення. Паузи на добір слів нормальні; якщо забули слово, опишіть його інакше й продовжте розмову.",
+        },
+        {
+          id: "b1-checkpoint-write",
+          title: "Зв’язний текст і відгук на нього",
+          details: "Напишіть email і статтю або історію приблизно по 100 слів у форматі B1 Preliminary. Перевірте зміст, абзаци, зв’язки й доречність мови; отримайте відгук і перепишіть один текст.",
+          links: [EXTERNAL.preliminaryPreparation, EXTERNAL.writeAndImprove],
         },
         {
           id: "b1-checkpoint-exam",
-          title: "Складіть B1 Preliminary або IELTS (4.0–5.0)",
-          details: "Сертифікат знадобиться для навчання, роботи чи візи; для себе достатньо пробного тесту.",
+          title: "Складіть B1 Preliminary, якщо потрібен сертифікат",
+          details: "Перед реєстрацією перевірте, який іспит і результат приймає потрібна вам організація. Для навчального плану використовуйте пробні завдання та оцінювання всіх навичок.",
           links: [EXTERNAL.preliminaryPreparation],
           optional: true,
         },

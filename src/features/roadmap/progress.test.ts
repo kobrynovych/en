@@ -23,6 +23,7 @@ function stage(id: RoadmapStage["id"], tasks: Array<{ id: string; optional?: boo
     pace: "",
     vocabulary: "",
     certification: "",
+    learningPath: [],
     outcomes: [],
     functions: [],
     topics: [],

@@ -38,6 +38,7 @@ export const EXTERNAL = {
   keyPreparation: { label: "A2 Key: зразки завдань", href: "https://www.cambridgeenglish.org/exams-and-tests/qualifications/key/preparation/" },
   preliminaryPreparation: { label: "B1 Preliminary: зразки завдань", href: "https://www.cambridgeenglish.org/exams-and-tests/qualifications/preliminary/preparation/" },
   firstPreparation: { label: "B2 First: зразки завдань", href: "https://www.cambridgeenglish.org/exams-and-tests/qualifications/first/preparation/" },
+  cambridgeScores: { label: "Cambridge: оцінювання пробного тесту (PDF)", href: "https://www.cambridgeenglish.org/Images/210434-converting-practice-test-scores-to-cambridge-english-scale-scores.pdf" },
   newsInLevels: { label: "News in Levels", href: "https://www.newsinlevels.com/" },
   breakingNewsEnglish: { label: "Breaking News English", href: "https://breakingnewsenglish.com/" },
   writeAndImprove: { label: "Write & Improve (Cambridge)", href: "https://writeandimprove.com/" },

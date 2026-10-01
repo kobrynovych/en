@@ -67,13 +67,15 @@ export interface RoadmapStage {
   cefrName: string;
   tagline: string;
   summary: string;
-  /** Guided learning hours for this stage alone. */
+  /** Editorial estimate for this stage; the Pre-A1 warm-up is included in A1's cumulative total. */
   stageHours: string;
   /** Cumulative guided learning hours from zero (Cambridge English guideline). */
   totalHours: string;
   pace: string;
   vocabulary: string;
   certification: string;
+  /** Suggested sequence within the level; skills are practised alongside each step. */
+  learningPath: string[];
   outcomes: RoadmapOutcome[];
   functions: string[];
   topics: string[];

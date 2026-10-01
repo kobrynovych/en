@@ -38,6 +38,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
   const [hideCompleted, setHideCompleted] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const stageListRef = useRef<HTMLOListElement>(null);
+  const initialAnchorHandled = useRef(false);
 
   const summary = useMemo(() => summarizeRoadmap(stages, completed), [stages, completed]);
   const nextTask = useMemo(() => findNextTask(stages, completed), [stages, completed]);
@@ -47,10 +48,20 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
 
   useEffect(() => {
     if (!hydrated || expanded !== null) return;
-    const linkedStage = stages.find((stage) => window.location.hash === `#stage-${stage.id}`);
+    const hash = window.location.hash;
+    const linkedStage = stages.find((stage) =>
+      hash === `#stage-${stage.id}` || stage.modules.some((module) => hash === `#module-${module.id}`),
+    );
     // eslint-disable-next-line react-hooks/set-state-in-effect -- open the current (or linked) stage once saved progress is restored
     setExpanded(new Set([linkedStage?.id ?? currentStageId]));
   }, [hydrated, expanded, stages, currentStageId]);
+
+  useEffect(() => {
+    if (!hydrated || expanded === null || initialAnchorHandled.current) return;
+    initialAnchorHandled.current = true;
+    const hash = window.location.hash;
+    if (hash.startsWith("#module-")) document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" });
+  }, [hydrated, expanded]);
 
   // On narrow screens the stage list scrolls horizontally: keep the current stage in view.
   useEffect(() => {
@@ -96,7 +107,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
         <div className="flex flex-wrap gap-2">
           <Badge variant="emerald">CEFR</Badge>
           <Badge variant="sky">Від нуля до B2</Badge>
-          <Badge variant="amber">≈ 500–600 навчальних годин</Badge>
+          <Badge variant="amber">До B2: ≈ 500–600 год від нуля</Badge>
         </div>
         <h1 className="mt-4 max-w-4xl text-3xl font-black leading-tight text-slate-950 sm:text-4xl dark:text-white">
           Дорожня карта англійської: від нуля до B2
@@ -104,6 +115,9 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
         <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">
           Покроковий план за міжнародною шкалою CEFR: для кожного рівня — цілі, граматика, лексика, вимова, чотири мовні
           навички, типові помилки й контрольні точки. Відмічайте виконані пункти: прогрес зберігається в цьому браузері.
+        </p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+          Відсоток показує виконання плану. Рівень перевіряйте окремо за слуханням, читанням, говорінням і письмом.
         </p>
 
         <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -124,7 +138,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
               ) : (
                 <span className="inline-flex items-center gap-2 font-semibold text-emerald-700 dark:text-emerald-400">
                   <PartyPopper className="size-4" aria-hidden="true" />
-                  Усі обов’язкові пункти виконано — вітаємо з рівнем B2!
+                  План виконано — перевірте свої навички за контрольною точкою B2.
                 </span>
               )}
             </p>
@@ -188,7 +202,8 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
               ))}
             </ul>
             <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
-              Мало часу? Скоротіть кожен блок удвічі, але займайтеся щодня.
+              Мало часу? Скоротіть кожен блок удвічі. Довшу розмову чи письмову роботу можна виконати замість
+              кількох блоків. Тривалості в завданнях — варіанти практики, їх не потрібно додавати всі до щоденної години.
             </p>
           </div>
         </div>
@@ -267,9 +282,9 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
               );
             })}
           </ol>
-          <p className="mt-4 hidden text-xs leading-5 text-slate-500 lg:block dark:text-slate-400">
-            {taskCount} пунктів, з них опційні не впливають на відсоток. Години — орієнтир Cambridge English для навчання з
-            викладачем; самостійно може знадобитися більше.
+          <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {taskCount} пунктів, з них опційні не впливають на відсоток. Години «від нуля» — накопичувальні орієнтири
+            Cambridge для занять і навчання під керівництвом викладача. Їх не потрібно додавати між рівнями.
           </p>
         </aside>
 
@@ -295,7 +310,14 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
                 <h2 className="text-xl font-black text-slate-950 dark:text-white">На чому ґрунтується карта</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
                   Цілі рівнів переказують дескриптори CEFR, граматика й теми — British Council / EAQUALS Core Inventory,
-                  години — рекомендації Cambridge English, обсяг лексики — Oxford 3000/5000 і дослідження словникового запасу.
+                  години від нуля — рекомендації Cambridge English. Розподіл тем, темп етапів і обсяг практики —
+                  навчальні орієнтири цієї карти, які можна адаптувати під свою мету.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                  CEFR описує вміння, а не обов’язкову кількість слів чи єдиний список граматики. Лексичні діапазони
+                  приблизні й накопичувальні; впізнавати слово та вживати його — різні вміння. Стартові 20–30 год
+                  включено до A1. Час самостійної практики індивідуальний. Довжини текстів і тривалості розмов —
+                  тренувальні цілі; формат іспиту застосовується лише там, де його прямо зазначено.
                 </p>
               </div>
             </div>
