@@ -45,8 +45,9 @@ import type {
 
 export const STAGE_ACCENTS: Record<RoadmapStageId, string> = {
   start: "bg-slate-700 text-white dark:bg-slate-600",
-  a1: "bg-emerald-600 text-white",
-  a2: "bg-sky-600 text-white",
+  // -700 shades keep white text above the WCAG AA 4.5:1 contrast ratio.
+  a1: "bg-emerald-700 text-white",
+  a2: "bg-sky-700 text-white",
   b1: "bg-amber-500 text-slate-950",
   b2: "bg-violet-600 text-white",
 };
@@ -368,11 +369,9 @@ function ModuleCard({
   const summary = summarizeTasks(module.tasks, completed);
   const tasks = hideCompleted ? module.tasks.filter((task) => !completed[task.id]) : module.tasks;
 
+  // A plain container: dozens of module regions named "Граматика", "Лексика"… would make landmark navigation ambiguous.
   return (
-    <section
-      aria-labelledby={`module-${module.id}`}
-      className="rounded-lg border border-slate-200 dark:border-slate-700"
-    >
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700">
       <div className="flex items-start gap-3 border-b border-slate-200 bg-slate-50/80 px-3 py-3 sm:px-4 dark:border-slate-700 dark:bg-slate-800/40">
         <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-md bg-white text-emerald-700 shadow-sm dark:bg-slate-900 dark:text-emerald-400">
           <Icon className="size-5" aria-hidden="true" />
@@ -413,7 +412,7 @@ function ModuleCard({
           Усі пункти модуля виконано
         </p>
       )}
-    </section>
+    </div>
   );
 }
 

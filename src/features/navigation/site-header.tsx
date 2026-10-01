@@ -112,7 +112,9 @@ function NavDropdown({ group, pathname }: { group: NavGroup; pathname: string })
       <div
         id={panelId}
         hidden={!open}
-        className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+        // Focusable so a click on the panel's padding keeps focus inside instead of closing it.
+        tabIndex={-1}
+        className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2 shadow-lg outline-none dark:border-slate-700 dark:bg-slate-900"
       >
         <ul className="space-y-1">
           {group.items.map((item) => {

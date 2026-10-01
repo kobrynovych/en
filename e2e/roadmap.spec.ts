@@ -110,7 +110,7 @@ test("a task opens an AI assistant with a detailed study prompt", async ({ page,
   const chatgpt = task.getByRole("link", { name: /ChatGPT/ });
   const prompt = new URL((await chatgpt.getAttribute("href")) ?? "").searchParams.get("q");
   expect(prompt).toContain(`Пункт: ${FIRST_TASK}.`);
-  expect(prompt).toContain("Мій рівень: Pre-A1");
+  expect(prompt).toContain("Рівень матеріалу: Pre-A1");
   await expect(task.getByRole("link", { name: /Gemini/ })).toHaveAttribute("href", "https://gemini.google.com/app");
 
   const popupPromise = context.waitForEvent("page");
@@ -138,6 +138,83 @@ test("the AI prompt can be copied and reviewed", async ({ page, context }) => {
 
   await task.getByText("Переглянути запит").click();
   await expect(task.locator("pre")).toContainText("Пункт: Привітання й знайомство.");
+});
+
+test("the AI panel fits the viewport after opening, previewing and resizing", async ({ page, isMobile }) => {
+  if (!isMobile) await page.setViewportSize({ width: 800, height: 600 });
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+  const trigger = task.getByRole("button", { name: /Вивчити з ШІ/ });
+  await trigger.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await trigger.click();
+  const panelId = await trigger.getAttribute("aria-controls");
+  const panel = page.locator(`[id="${panelId}"]`);
+
+  async function expectPanelToFit() {
+    await expect(async () => {
+      const box = await panel.boundingBox();
+      const size = page.viewportSize();
+      expect(box).not.toBeNull();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(size!.height);
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(size!.width);
+    }).toPass({ timeout: 5000 });
+  }
+
+  await expectPanelToFit();
+  await task.getByText("Переглянути запит", { exact: true }).click();
+  await expect(task.locator("details")).toHaveAttribute("open", "");
+  await expectPanelToFit();
+  await page.setViewportSize(isMobile ? { width: 390, height: 700 } : { width: 800, height: 500 });
+  await expectPanelToFit();
+
+  // Every service and the close control remain reachable by scrolling the panel.
+  await task.getByRole("link", { name: /Grok/ }).focus();
+  await expect(task.getByRole("link", { name: /Grok/ })).toBeInViewport();
+  await task.getByRole("button", { name: "Закрити меню ШІ" }).click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(trigger).toBeFocused();
+});
+
+test("the AI panel stays open on inner clicks and scrolls away with its trigger", async ({ page, isMobile }) => {
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+  const trigger = task.getByRole("button", { name: /Вивчити з ШІ/ });
+  await trigger.click();
+  await task.getByText(/Відкриється нова вкладка/).click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+  // On small screens the panel is a bottom sheet that does not follow its trigger.
+  if (!isMobile) {
+    const panel = page.locator(`[id="${await trigger.getAttribute("aria-controls")}"]`);
+    const offsetFromTrigger = async () => (await panel.boundingBox())!.y - (await trigger.boundingBox())!.y;
+    const offsetBefore = await offsetFromTrigger();
+    await page.evaluate(() => window.scrollBy({ top: 2000, behavior: "instant" }));
+    await expect(panel).not.toBeInViewport();
+    expect(await offsetFromTrigger()).toBeCloseTo(offsetBefore, 0);
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  }
+});
+
+test("a blocked clipboard exposes the prompt for manual copying", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: () => Promise.reject(new DOMException("Blocked", "NotAllowedError")) },
+    });
+    document.execCommand = () => false;
+  });
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+  await task.getByRole("button", { name: /Вивчити з ШІ/ }).click();
+  await task.getByRole("button", { name: "Скопіювати запит" }).click();
+  await expect(task.getByText(/Не вдалося скопіювати автоматично/)).toBeVisible();
+  await expect(task.locator("pre")).toBeVisible();
+  await expect(task.locator("pre")).toContainText(`Пункт: ${FIRST_TASK}.`);
+  await task.locator("pre").click();
+  await expect(task.locator("pre")).toBeFocused();
+  await expect(task.getByRole("button", { name: /Вивчити з ШІ/ })).toHaveAttribute("aria-expanded", "true");
 });
 
 test("desktop dropdown opens dictionary levels", async ({ page, isMobile }) => {

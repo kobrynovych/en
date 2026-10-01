@@ -62,6 +62,8 @@ Every task has a "Вивчити з ШІ" menu. It builds a Ukrainian study prom
 
 Behaviour was checked on 1 October 2026; these parameters are undocumented and may change. Prompts live in `src/features/roadmap/ai-study.ts`; a unit test keeps every prompt under 1,500 characters and every link under 7,500, because Cyrillic is percent-encoded into long URLs.
 
+Prompts specify the material's target level, not a level the learner has already achieved. Practice waits for an attempt before revealing answers, and checkpoint feedback is explicitly formative rather than a CEFR certification. The menu can be scrolled within the available viewport space; its prompt preview also supports keyboard focus and manual copying if clipboard access fails. Browser tests stub the external assistants, so they check our links and clipboard flow, not the services' live behaviour after login.
+
 ## Commands
 
 ```bash

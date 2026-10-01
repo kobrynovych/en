@@ -21,6 +21,16 @@ export interface TaskLocation {
   task: RoadmapTask;
 }
 
+/**
+ * Rounded percentage that never reads 0% once a task is done or 100% while one is left:
+ * with 230 tasks, plain rounding shows 0% after the first check and 100% before the last one.
+ */
+function progressPercent(done: number, total: number) {
+  if (done <= 0 || total <= 0) return 0;
+  if (done >= total) return 100;
+  return Math.min(99, Math.max(1, percentage(done, total)));
+}
+
 /** Optional tasks never count towards progress, so a learner can reach 100% without an official exam. */
 export function summarizeTasks(tasks: readonly RoadmapTask[], completed: CompletedTasks): ProgressSummary {
   let done = 0;
@@ -30,7 +40,7 @@ export function summarizeTasks(tasks: readonly RoadmapTask[], completed: Complet
     total += 1;
     if (completed[task.id]) done += 1;
   }
-  return { done, total, percent: percentage(done, total) };
+  return { done, total, percent: progressPercent(done, total) };
 }
 
 export function getStageTasks(stage: RoadmapStage): RoadmapTask[] {

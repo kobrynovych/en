@@ -57,6 +57,16 @@ describe("roadmap progress summaries", () => {
     expect(summarizeRoadmap(stages, { "removed-task": "2026-09-01T00:00:00.000Z" }).done).toBe(0);
   });
 
+  it("never shows 0% after the first task or 100% before the last one", () => {
+    const many = stage("b1", Array.from({ length: 230 }, (_, index) => ({ id: `b1-task-${index}` })));
+    const allButOne = Object.fromEntries(many.modules[0].tasks.slice(1).map((task) => [task.id, "x"]));
+
+    expect(summarizeStage(many, {}).percent).toBe(0);
+    expect(summarizeStage(many, { "b1-task-0": "x" }).percent).toBe(1);
+    expect(summarizeStage(many, allButOne).percent).toBe(99);
+    expect(summarizeStage(many, { ...allButOne, "b1-task-0": "x" }).percent).toBe(100);
+  });
+
   it("derives the stage status", () => {
     expect(getStageStatus({ done: 0, total: 2, percent: 0 })).toBe("not-started");
     expect(getStageStatus({ done: 1, total: 2, percent: 50 })).toBe("in-progress");

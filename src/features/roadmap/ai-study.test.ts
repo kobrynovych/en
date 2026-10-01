@@ -22,7 +22,8 @@ describe("buildStudyPrompt", () => {
   it("carries the level, section, task description and examples", () => {
     const prompt = promptFor("a1-grammar-to-be");
 
-    expect(prompt).toContain("Мій рівень: A1 (початковий).");
+    expect(prompt).toContain("Рівень матеріалу: A1 (початковий).");
+    expect(prompt).not.toContain("Мій рівень:");
     expect(prompt).toContain("Розділ: Граматика.");
     expect(prompt).toContain("Пункт: Дієслово to be: am / is / are.");
     expect(prompt).toContain("Опис у плані: Ствердження, заперечення й запитання");
@@ -31,7 +32,9 @@ describe("buildStudyPrompt", () => {
   });
 
   it("tells the assistant that a Pre-A1 learner starts from zero", () => {
-    expect(promptFor("start-phrases-greetings")).toContain("Pre-A1 (старт), починаю вивчати англійську з нуля");
+    const prompt = promptFor("start-phrases-greetings");
+    expect(prompt).toContain("Рівень матеріалу: Pre-A1 (старт).\nЯ починаю вивчати англійську з нуля.");
+    expect(promptFor("a1-grammar-to-be")).not.toContain("з нуля");
   });
 
   it("adapts the lesson plan to the module", () => {
@@ -66,6 +69,14 @@ describe("buildStudyPrompt", () => {
 
   it("omits the examples line when a task has no examples", () => {
     expect(promptFor("start-setup-goal")).not.toContain("Приклади з плану");
+  });
+
+  it("does not contradict interactive practice with an immediate answer key", () => {
+    for (const { stage, roadmapModule, task } of entries) {
+      const prompt = buildStudyPrompt(stage, roadmapModule, task);
+      expect(prompt, task.id).toContain("не показуй готових відповідей до моєї спроби");
+      expect(prompt, task.id).not.toMatch(/відповіді\s*—\s*(окремо|в самому кінці)/i);
+    }
   });
 
   it("keeps every prompt short enough to travel in a URL", () => {
