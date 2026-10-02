@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
 const FIRST_TASK = "Сформулюйте мету й термін";
@@ -215,6 +216,161 @@ test("a blocked clipboard exposes the prompt for manual copying", async ({ page 
   await task.locator("pre").click();
   await expect(task.locator("pre")).toBeFocused();
   await expect(task.getByRole("button", { name: /Вивчити з ШІ/ })).toHaveAttribute("aria-expanded", "true");
+});
+
+test("a task note is saved automatically, survives a reload and can be deleted with undo", async ({ page }) => {
+  const note = "Мета: B1 до червня, щодня по 40 хвилин.";
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+
+  await task.getByRole("button", { name: `Додати нотатку: ${FIRST_TASK}` }).click();
+  const editor = task.getByRole("textbox", { name: `Нотатка до пункту «${FIRST_TASK}»` });
+  await expect(editor).toBeFocused();
+  await editor.fill(note);
+  await expect(task.getByText("Збережено")).toBeVisible();
+  await page.keyboard.press("Escape");
+  const editButton = task.getByRole("button", { name: `Редагувати нотатку: ${FIRST_TASK}` });
+  await expect(editButton).toBeFocused();
+  await expect(task.getByText(note)).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator("[data-hydrated]")).toHaveAttribute("data-hydrated", "true");
+  await expect(task.getByText(note)).toBeVisible();
+
+  await editButton.click();
+  await task.getByRole("button", { name: "Видалити нотатку" }).click();
+  await expect(task.getByText("Нотатку видалено.")).toBeVisible();
+  await expect(task.getByRole("button", { name: "Відновити нотатку" })).toBeFocused();
+  await task.getByRole("button", { name: "Відновити нотатку" }).click();
+  await expect(task.getByText(note)).toBeVisible();
+  await expect(editButton).toBeFocused();
+});
+
+test("notes can be searched, filtered and downloaded as Markdown", async ({ page }) => {
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+  await task.getByRole("button", { name: /Додати нотатку/ }).click();
+  await task.getByRole("textbox").fill("Купити зошит для слів-квітників");
+  await page.keyboard.press("Escape");
+
+  const searchbox = page.getByRole("searchbox", { name: "Пошук пунктів" });
+  await searchbox.fill("квітників");
+  await expect(page.getByRole("search").getByRole("status")).toHaveText("Знайдено 1 пункт");
+  await expect(task.locator("mark")).toHaveText("квітників");
+
+  await searchbox.fill("");
+  const notesTools = page.getByRole("group", { name: "Мої нотатки: 1" });
+  await notesTools.getByRole("button", { name: "Показати" }).click();
+  await expect(page.locator("[id^='task-']")).toHaveCount(1);
+  await expect(page).toHaveURL(/[?&]notes=1/);
+
+  const downloadPromise = page.waitForEvent("download");
+  await notesTools.getByRole("button", { name: "Завантажити (.md)" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^english-path-notes-\d{4}-\d{2}-\d{2}\.md$/);
+  const markdown = await readFile(await download.path(), "utf8");
+  expect(markdown).toContain("## Pre-A1 · Старт");
+  expect(markdown).toContain(`### Налаштування навчання: ${FIRST_TASK}`);
+  expect(markdown).toContain("Купити зошит для слів-квітників");
+});
+
+test("deleting a note in the notes view keeps the task for undo until the filters change", async ({ page }) => {
+  await openRoadmap(page);
+  const task = page.locator("#task-start-setup-goal");
+  await task.getByRole("button", { name: /Додати нотатку/ }).click();
+  await task.getByRole("textbox").fill("Нотатка, яку видалю");
+  await page.keyboard.press("Escape");
+  await page.getByRole("group", { name: "Мої нотатки: 1" }).getByRole("button", { name: "Показати" }).click();
+  await expect(page.locator("[id^='task-']")).toHaveCount(1);
+
+  await task.getByRole("button", { name: /Редагувати нотатку/ }).click();
+  await task.getByRole("button", { name: "Видалити нотатку" }).click();
+  // The task no longer has a note but stays visible, so the deletion can be undone.
+  await expect(task.getByText("Нотатку видалено.")).toBeVisible();
+  await task.getByRole("button", { name: "Відновити нотатку" }).click();
+  await expect(task.getByText("Нотатка, яку видалю")).toBeVisible();
+
+  await task.getByRole("button", { name: /Редагувати нотатку/ }).click();
+  await task.getByRole("button", { name: "Видалити нотатку" }).click();
+  await page.getByRole("searchbox", { name: "Пошук пунктів" }).fill("qqqzzz");
+  await expect(page.getByRole("heading", { name: "Нічого не знайдено" })).toBeVisible();
+});
+
+test("search highlights matches, keeps the query in the address and returns to the plan", async ({ page }) => {
+  await openRoadmap(page);
+  const searchbox = page.getByRole("searchbox", { name: "Пошук пунктів" });
+
+  await page.keyboard.press("/");
+  await expect(searchbox).toBeFocused();
+  await page.keyboard.type("present perfect");
+  await expect(page.getByRole("search").getByRole("status")).toHaveText(/^Знайдено \d+ пункт/);
+  const results = page.locator("[id^='task-']");
+  await expect(results.first().locator("mark").first()).toHaveText(/^present$/i);
+  const count = await results.count();
+  expect(count).toBeGreaterThan(1);
+  await expect(page).toHaveURL(/[?&]q=present\+perfect/);
+
+  await page.reload();
+  await expect(page.locator("[data-hydrated]")).toHaveAttribute("data-hydrated", "true");
+  await expect(searchbox).toHaveValue("present perfect");
+  await expect(results).toHaveCount(count);
+
+  // "Continue" leaves the search when the next task is not among the results.
+  await page.getByRole("button", { name: "Продовжити" }).click();
+  await expect(page.getByRole("checkbox", { name: FIRST_TASK })).toBeFocused();
+  await expect(searchbox).toHaveValue("");
+  await expect(page).not.toHaveURL(/q=/);
+
+  await searchbox.fill("qqqzzz");
+  await expect(page.getByRole("heading", { name: "Нічого не знайдено" })).toBeVisible();
+  await searchbox.press("Escape");
+  await expect(searchbox).toHaveValue("");
+  await expect(page.getByRole("button", { name: /Pre-A1 · Старт/ })).toBeVisible();
+});
+
+test("level, section and status filters combine and can be removed one by one", async ({ page }) => {
+  await openRoadmap(page);
+  const filtersButton = page.getByRole("button", { name: /^Фільтри/ });
+  await filtersButton.click();
+  await expect(filtersButton).toHaveAttribute("aria-expanded", "true");
+
+  await page.getByRole("button", { name: "A2", exact: true }).click();
+  await page.getByRole("button", { name: "Граматика", exact: true }).click();
+  await expect(page.getByRole("button", { name: "A2", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/[?&]level=a2&section=grammar/);
+  await expect(page.locator("[id^='module-']")).toHaveCount(1);
+  await expect(page.locator("#module-a2-grammar")).toBeVisible();
+
+  await page.locator("label").filter({ hasText: /^Виконані$/ }).click();
+  await expect(page.getByRole("heading", { name: "Нічого не знайдено" })).toBeVisible();
+
+  const removeDone = page.getByRole("button", { name: "Виконані — прибрати фільтр" });
+  await removeDone.click();
+  await expect(page.locator("#module-a2-grammar")).toBeVisible();
+  // Focus moves to a neighbouring chip instead of getting lost.
+  await expect(page.getByRole("button", { name: "Граматика — прибрати фільтр" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Скинути все" }).click();
+  await expect(page.getByRole("searchbox", { name: "Пошук пунктів" })).toBeFocused();
+  await expect(page.getByRole("button", { name: /Pre-A1 · Старт/ })).toBeVisible();
+  await expect(page).not.toHaveURL(/level=/);
+});
+
+test("the hide-completed button and the status filter share one state", async ({ page }) => {
+  await openRoadmap(page);
+  await page.getByRole("checkbox", { name: FIRST_TASK }).check();
+
+  const hide = page.getByRole("button", { name: "Сховати виконані" });
+  await hide.click();
+  await expect(hide).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("checkbox", { name: FIRST_TASK })).toHaveCount(0);
+  await expect(page).toHaveURL(/[?&]status=todo/);
+
+  await page.getByRole("button", { name: /^Фільтри/ }).click();
+  await expect(page.getByRole("radio", { name: "Невиконані" })).toBeChecked();
+  await page.locator("label").filter({ hasText: /^Усі$/ }).click();
+  await expect(hide).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("checkbox", { name: FIRST_TASK })).toBeVisible();
 });
 
 test("desktop dropdown opens dictionary levels", async ({ page, isMobile }) => {

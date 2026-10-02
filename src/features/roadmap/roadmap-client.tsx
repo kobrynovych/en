@@ -1,13 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ArrowRight, BookOpenCheck, Eye, EyeOff, Lightbulb, PartyPopper, RotateCcw, Route } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Check, EyeOff, Lightbulb, PartyPopper, RotateCcw, Route } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Progress } from "@/shared/ui/progress";
 import { cn } from "@/shared/lib/cn";
+import { downloadTextFile } from "@/shared/lib/download-text";
+import { pluralUk } from "@/shared/lib/plural-uk";
+import {
+  buildSearchIndex,
+  DEFAULT_FILTERS,
+  filterRoadmap,
+  filtersFromSearchParams,
+  filtersToSearchParams,
+  isSearchMode,
+  matchesStatus,
+  MODULE_KINDS,
+  sameFilters,
+  searchTerms,
+  type RoadmapFilters,
+} from "./filters";
+import { notesToMarkdown } from "./notes";
 import {
   findNextTask,
   getStageStatus,
@@ -16,8 +32,11 @@ import {
   summarizeStage,
   type TaskLocation,
 } from "./progress";
-import { ResourceList, STAGE_ACCENTS, StageSection, stageHeading } from "./roadmap-stage";
+import { RoadmapFilterBar } from "./roadmap-filters";
+import { RoadmapResults, TASK_FORMS } from "./roadmap-results";
+import { ResourceList, STAGE_ACCENTS, StageSection, stageHeading, type TaskListProps } from "./roadmap-stage";
 import type { RoadmapResource, RoadmapStage, RoadmapStageId } from "./types";
+import { useRoadmapNotes } from "./use-roadmap-notes";
 import { useRoadmapProgress } from "./use-roadmap-progress";
 
 interface RoadmapClientProps {
@@ -31,6 +50,25 @@ function scrollBehavior(): ScrollBehavior {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
 
+interface Pins {
+  /** The filters the pins were made under: a new search or filter shows exactly what matches. */
+  key: string;
+  ids: ReadonlySet<string>;
+}
+
+const NO_PINS: ReadonlySet<string> = new Set();
+const MATCH_FORMS = ["збіг", "збіги", "збігів"] as const;
+const URL_SYNC_DELAY_MS = 300;
+
+/** Leaves search mode but keeps the status filter, which also applies to the plan itself. */
+function withoutSearch(filters: RoadmapFilters): RoadmapFilters {
+  return isSearchMode(filters) ? { ...DEFAULT_FILTERS, status: filters.status } : filters;
+}
+
+function isEditable(target: EventTarget | null) {
+  return target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select") !== null);
+}
+
 /** The stage that contains a `#stage-…` or `#module-…` anchor. */
 function findLinkedStage(stages: RoadmapStage[], hash: string) {
   return stages.find(
@@ -40,18 +78,124 @@ function findLinkedStage(stages: RoadmapStage[], hash: string) {
 
 export function RoadmapClient({ stages, principles, routine, sources }: RoadmapClientProps) {
   const { completed, hydrated, toggle, clear } = useRoadmapProgress();
+  const { notes, setNote } = useRoadmapNotes();
   // null until the saved progress is known; then the learner's current stage is opened once.
   const [expanded, setExpanded] = useState<ReadonlySet<RoadmapStageId> | null>(null);
-  const [hideCompleted, setHideCompleted] = useState(false);
+  const [filters, setFilters] = useState<RoadmapFilters>(DEFAULT_FILTERS);
+  const [pins, setPins] = useState<Pins>({ key: "", ids: NO_PINS });
   const [resetOpen, setResetOpen] = useState(false);
   const stageListRef = useRef<HTMLOListElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const initialAnchorHandled = useRef(false);
+  const filtersRestored = useRef(false);
 
   const summary = useMemo(() => summarizeRoadmap(stages, completed), [stages, completed]);
   const nextTask = useMemo(() => findNextTask(stages, completed), [stages, completed]);
   const taskCount = useMemo(() => stages.reduce((sum, stage) => sum + getStageTasks(stage).length, 0), [stages]);
   const currentStageId = nextTask?.stage.id ?? stages[stages.length - 1].id;
   const expandedStages = expanded ?? new Set<RoadmapStageId>([stages[0].id]);
+
+  // Typing re-renders the results in the background; clearing the query applies at once, which navigation relies on.
+  const deferredQuery = useDeferredValue(filters.query);
+  const query = filters.query ? deferredQuery : "";
+  const stale = query !== filters.query;
+  const appliedFilters = useMemo<RoadmapFilters>(
+    () => ({ query, stages: filters.stages, kinds: filters.kinds, status: filters.status, withNotes: filters.withNotes }),
+    [query, filters.stages, filters.kinds, filters.status, filters.withNotes],
+  );
+  const searchIndex = useMemo(() => buildSearchIndex(stages), [stages]);
+  const searchMode = isSearchMode(appliedFilters);
+  // An open note editor or a pending undo keeps its task visible under the filters it was opened with.
+  const filtersKey = filtersToSearchParams(appliedFilters).toString();
+  const filtersKeyRef = useRef(filtersKey);
+  const pinned = pins.key === filtersKey ? pins.ids : NO_PINS;
+  const result = useMemo(
+    () => (searchMode ? filterRoadmap(searchIndex, appliedFilters, completed, notes, pinned) : null),
+    [searchMode, searchIndex, appliedFilters, completed, notes, pinned],
+  );
+  const terms = useMemo(() => searchTerms(query), [query]);
+  const matchCounts = useMemo(() => new Map(result?.stages.map((group) => [group.stage.id, group.count])), [result]);
+  const notesCount = Object.keys(notes).length;
+
+  let resultSummary = "";
+  if (result) {
+    resultSummary = result.count === 0 ? "Нічого не знайдено" : `Знайдено ${result.count} ${pluralUk(result.count, TASK_FORMS)}`;
+  } else if (filters.status !== "all") {
+    const shown = searchIndex.filter((entry) => matchesStatus(Boolean(completed[entry.task.id]), filters.status)).length;
+    resultSummary = `${filters.status === "todo" ? "Невиконаних" : "Виконаних"} пунктів: ${shown}`;
+  }
+
+  const updateFilters = useCallback(
+    (patch: Partial<RoadmapFilters>) => setFilters((current) => ({ ...current, ...patch })),
+    [],
+  );
+  const resetFilters = useCallback(() => setFilters(DEFAULT_FILTERS), []);
+  const setTaskPinned = useCallback((taskId: string, isPinned: boolean) => {
+    const key = filtersKeyRef.current;
+    setPins((previous) => {
+      const ids = previous.key === key ? previous.ids : NO_PINS;
+      if (ids.has(taskId) === isPinned) return ids === previous.ids ? previous : { key, ids };
+      const next = new Set(ids);
+      if (isPinned) next.add(taskId);
+      else next.delete(taskId);
+      return { key, ids: next };
+    });
+  }, []);
+
+  // Layout effects run before the tasks' passive effects, so a pin request always sees the current filters.
+  useLayoutEffect(() => {
+    filtersKeyRef.current = filtersKey;
+  }, [filtersKey]);
+
+  const taskList: TaskListProps = {
+    completed,
+    notes,
+    pinned,
+    onToggleTask: toggle,
+    onSaveNote: setNote,
+    onPinChange: setTaskPinned,
+  };
+
+  // Filters live in the address (?q=…&level=…), so a filtered view survives a reload and can be bookmarked.
+  useEffect(() => {
+    if (filtersRestored.current) return;
+    filtersRestored.current = true;
+    const restored = filtersFromSearchParams(
+      new URLSearchParams(window.location.search),
+      stages.map((stage) => stage.id),
+      MODULE_KINDS,
+    );
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the address can only be read after hydration
+    if (!sameFilters(restored, DEFAULT_FILTERS)) setFilters(restored);
+  }, [stages]);
+
+  useEffect(() => {
+    if (!filtersRestored.current) return;
+    const timer = window.setTimeout(() => {
+      const { pathname, search, hash } = window.location;
+      const params = filtersToSearchParams(filters, new URLSearchParams(search)).toString();
+      const next = `${pathname}${params ? `?${params}` : ""}${hash}`;
+      if (next !== `${pathname}${search}${hash}`) window.history.replaceState(null, "", next);
+    }, URL_SYNC_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [filters]);
+
+  // "/" jumps to the search field, as on GitHub or MDN; the physical key works in the Ukrainian layout too.
+  useEffect(() => {
+    function focusSearch(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.key !== "/" && !(event.code === "Slash" && !event.shiftKey)) return;
+      if (isEditable(event.target) || (event.target instanceof Element && event.target.closest("[role='dialog']"))) return;
+      const input = searchInputRef.current;
+      if (!input) return;
+      event.preventDefault();
+      input.focus({ preventScroll: true });
+      input.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
+      input.select();
+    }
+    document.addEventListener("keydown", focusSearch);
+    return () => document.removeEventListener("keydown", focusSearch);
+  }, []);
 
   useEffect(() => {
     if (!hydrated || expanded !== null) return;
@@ -72,7 +216,10 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
     function revealHashTarget() {
       const linkedStage = findLinkedStage(stages, window.location.hash);
       if (!linkedStage) return;
-      flushSync(() => setExpanded((previous) => new Set(previous ?? [stages[0].id]).add(linkedStage.id)));
+      flushSync(() => {
+        setFilters(withoutSearch);
+        setExpanded((previous) => new Set(previous ?? [stages[0].id]).add(linkedStage.id));
+      });
       document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "start" });
     }
     window.addEventListener("hashchange", revealHashTarget);
@@ -100,12 +247,29 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
     flushSync(() => setExpanded((previous) => new Set(previous ?? expandedStages).add(stageId)));
   }
 
+  /** Scrolls to a level: to its search results if it has any, otherwise to the level in the plan. */
   function goToStage(stageId: RoadmapStageId) {
+    if (searchMode && !matchCounts.has(stageId)) flushSync(() => setFilters(withoutSearch));
     openStage(stageId);
     document.getElementById(`stage-${stageId}`)?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   }
 
+  /** "Відкрити рівень" in the search results: back to the plan, focused on that level. */
+  function showStageInPlan(stageId: RoadmapStageId) {
+    flushSync(() => setFilters(withoutSearch));
+    openStage(stageId);
+    const section = document.getElementById(`stage-${stageId}`);
+    section?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+    section?.querySelector<HTMLButtonElement>("h2 button")?.focus({ preventScroll: true });
+  }
+
   function goToTask(location: TaskLocation) {
+    if (!document.getElementById(`task-${location.task.id}`)) {
+      // A search or the "done" filter may hide the task: show it in the plan.
+      flushSync(() =>
+        setFilters((current) => ({ ...withoutSearch(current), status: current.status === "done" ? "all" : current.status })),
+      );
+    }
     openStage(location.stage.id);
     const element = document.getElementById(`task-${location.task.id}`);
     if (!element) return;
@@ -115,6 +279,12 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
 
   function setAllExpanded(open: boolean) {
     setExpanded(new Set(open ? stages.map((stage) => stage.id) : []));
+  }
+
+  function exportNotes() {
+    const now = new Date();
+    const date = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((part) => String(part).padStart(2, "0")).join("-");
+    downloadTextFile(`english-path-notes-${date}.md`, notesToMarkdown(stages, notes, now));
   }
 
   return (
@@ -130,7 +300,8 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
         </h1>
         <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">
           Покроковий план за міжнародною шкалою CEFR: для кожного рівня — цілі, граматика, лексика, вимова, чотири мовні
-          навички, типові помилки й контрольні точки. Відмічайте виконані пункти: прогрес зберігається в цьому браузері.
+          навички, типові помилки й контрольні точки. Відмічайте виконані пункти й додавайте власні нотатки: усе
+          зберігається в цьому браузері.
         </p>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
           Відсоток показує виконання плану. Рівень перевіряйте окремо за слуханням, читанням, говорінням і письмом.
@@ -166,14 +337,20 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             ) : null}
+            {/* The same state as "Невиконані" in the filters; a toggle keeps its label and reports aria-pressed. */}
             <Button
               type="button"
               variant="secondary"
-              aria-pressed={hideCompleted}
-              onClick={() => setHideCompleted((value) => !value)}
+              aria-pressed={filters.status === "todo"}
+              onClick={() => updateFilters({ status: filters.status === "todo" ? "all" : "todo" })}
+              className="aria-pressed:border-emerald-600 aria-pressed:bg-emerald-50 aria-pressed:text-emerald-900 dark:aria-pressed:border-emerald-500 dark:aria-pressed:bg-emerald-950/60 dark:aria-pressed:text-emerald-200"
             >
-              {hideCompleted ? <Eye className="size-4" aria-hidden="true" /> : <EyeOff className="size-4" aria-hidden="true" />}
-              {hideCompleted ? "Показати виконані" : "Сховати виконані"}
+              {filters.status === "todo" ? (
+                <Check className="size-4" aria-hidden="true" />
+              ) : (
+                <EyeOff className="size-4" aria-hidden="true" />
+              )}
+              Сховати виконані
             </Button>
             <Button type="button" variant="ghost" onClick={() => setResetOpen(true)} disabled={Object.keys(completed).length === 0}>
               <RotateCcw className="size-4" aria-hidden="true" />
@@ -232,7 +409,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
               <Route className="size-4" aria-hidden="true" />
               Етапи
             </h2>
-            <div className="flex gap-1 text-xs font-semibold">
+            <div className={cn("flex gap-1 text-xs font-semibold", searchMode && "invisible")}>
               <button
                 type="button"
                 onClick={() => setAllExpanded(true)}
@@ -257,6 +434,7 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
               const stageSummary = summarizeStage(stage, completed);
               const status = getStageStatus(stageSummary);
               const isCurrent = hydrated && stage.id === currentStageId && nextTask !== null;
+              const matches = matchCounts.get(stage.id) ?? 0;
               return (
                 <li key={stage.id} className="w-44 shrink-0 snap-start lg:w-auto">
                   <a
@@ -283,7 +461,15 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-bold text-slate-950 dark:text-white">{stage.title}</span>
                         <span className="block text-xs text-slate-500 dark:text-slate-400">
-                          {isCurrent ? "Ви тут" : status === "done" ? "Завершено" : `${stage.totalHours} від нуля`}
+                          {searchMode
+                            ? matches > 0
+                              ? `${matches} ${pluralUk(matches, MATCH_FORMS)}`
+                              : "Немає збігів"
+                            : isCurrent
+                              ? "Ви тут"
+                              : status === "done"
+                                ? "Завершено"
+                                : `${stage.totalHours} від нуля`}
                         </span>
                       </span>
                     </div>
@@ -305,17 +491,40 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
         </aside>
 
         <div className="min-w-0 space-y-4">
-          {stages.map((stage) => (
-            <StageSection
-              key={stage.id}
-              stage={stage}
-              completed={completed}
-              expanded={expandedStages.has(stage.id)}
-              hideCompleted={hideCompleted}
-              onToggleExpanded={toggleStage}
-              onToggleTask={toggle}
-            />
-          ))}
+          <RoadmapFilterBar
+            stages={stages}
+            filters={filters}
+            summary={hydrated ? resultSummary : ""}
+            notesCount={notesCount}
+            searchInputRef={searchInputRef}
+            onChange={updateFilters}
+            onReset={resetFilters}
+            onExportNotes={exportNotes}
+          />
+
+          <div className={cn("space-y-4 transition-opacity", stale && "opacity-60")} aria-busy={stale || undefined}>
+            {result ? (
+              <RoadmapResults
+                result={result}
+                status={appliedFilters.status}
+                terms={terms}
+                onOpenStage={showStageInPlan}
+                onReset={resetFilters}
+                {...taskList}
+              />
+            ) : (
+              stages.map((stage) => (
+                <StageSection
+                  key={stage.id}
+                  stage={stage}
+                  expanded={expandedStages.has(stage.id)}
+                  status={filters.status}
+                  onToggleExpanded={toggleStage}
+                  {...taskList}
+                />
+              ))
+            )}
+          </div>
 
           <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
             <div className="flex items-start gap-3">
@@ -350,8 +559,8 @@ export function RoadmapClient({ stages, principles, routine, sources }: RoadmapC
           <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-slate-200 bg-white p-6 shadow-2xl outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in dark:border-slate-700 dark:bg-slate-900">
             <Dialog.Title className="text-lg font-black text-slate-950 dark:text-white">Скинути прогрес дорожньої карти?</Dialog.Title>
             <Dialog.Description className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-              Усі позначки на дорожній карті буде видалено з цього браузера. Прогрес у словнику, повтореннях і тестах не
-              зміниться.
+              Усі позначки на дорожній карті буде видалено з цього браузера. Нотатки до пунктів, прогрес у словнику,
+              повтореннях і тестах залишаться.
             </Dialog.Description>
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Dialog.Close asChild>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
@@ -22,8 +22,11 @@ import {
   Mic,
   MessagesSquare,
   PenLine,
+  PencilLine,
   SpellCheck,
+  StickyNote,
   TriangleAlert,
+  Undo2,
   X,
 } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
@@ -31,7 +34,11 @@ import { Progress } from "@/shared/ui/progress";
 import { SpeakButton } from "@/shared/ui/speak-button";
 import { cn } from "@/shared/lib/cn";
 import { AiStudyMenu } from "./ai-study-menu";
+import { matchesStatus, type StatusFilter } from "./filters";
+import { Highlight } from "./highlight";
+import type { TaskNote, TaskNotes } from "./notes";
 import { getStageStatus, summarizeStage, summarizeTasks, type CompletedTasks, type StageStatus } from "./progress";
+import { TaskNoteEditor, TaskNotePreview } from "./task-note";
 import type {
   RoadmapLink,
   RoadmapModule,
@@ -96,7 +103,7 @@ export function StatusBadge({ status }: { status: StageStatus }) {
   );
 }
 
-export function RoadmapLinkChip({ link }: { link: RoadmapLink }) {
+export function RoadmapLinkChip({ link, terms }: { link: RoadmapLink; terms?: readonly string[] }) {
   const className = cn(
     "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors",
     focusRing,
@@ -111,7 +118,7 @@ export function RoadmapLinkChip({ link }: { link: RoadmapLink }) {
           "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300 dark:hover:bg-emerald-950",
         )}
       >
-        {link.label}
+        <Highlight text={link.label} terms={terms} />
         <ArrowRight className="size-3.5" aria-hidden="true" />
       </Link>
     );
@@ -127,30 +134,34 @@ export function RoadmapLinkChip({ link }: { link: RoadmapLink }) {
         "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800",
       )}
     >
-      {link.label}
+      <Highlight text={link.label} terms={terms} />
       <ExternalLink className="size-3.5" aria-hidden="true" />
       <span className="sr-only"> (відкриється в новій вкладці)</span>
     </a>
   );
 }
 
-interface StageSectionProps {
-  stage: RoadmapStage;
+/** Checklist state and handlers shared by every list of tasks (the plan and the search results). */
+export interface TaskListProps {
   completed: CompletedTasks;
-  expanded: boolean;
-  hideCompleted: boolean;
-  onToggleExpanded: (stageId: RoadmapStageId) => void;
+  notes: TaskNotes;
+  /** Tasks with an open note editor or a pending undo stay visible whatever the filters say. */
+  pinned: ReadonlySet<string>;
   onToggleTask: (taskId: string) => void;
+  /** Returns false when the note could not be written to localStorage. */
+  onSaveNote: (taskId: string, text: string) => boolean;
+  onPinChange: (taskId: string, pinned: boolean) => void;
 }
 
-export function StageSection({
-  stage,
-  completed,
-  expanded,
-  hideCompleted,
-  onToggleExpanded,
-  onToggleTask,
-}: StageSectionProps) {
+interface StageSectionProps extends TaskListProps {
+  stage: RoadmapStage;
+  expanded: boolean;
+  status: StatusFilter;
+  onToggleExpanded: (stageId: RoadmapStageId) => void;
+}
+
+export function StageSection({ stage, expanded, status: statusFilter, onToggleExpanded, ...taskList }: StageSectionProps) {
+  const { completed } = taskList;
   const summary = summarizeStage(stage, completed);
   const status = getStageStatus(summary);
   const contentId = `stage-${stage.id}-content`;
@@ -267,14 +278,13 @@ export function StageSection({
           </nav>
 
           <div className="space-y-4">
-            {stage.modules.map((module) => (
+            {stage.modules.map((roadmapModule) => (
               <ModuleCard
-                key={module.id}
+                key={roadmapModule.id}
                 stage={stage}
-                module={module}
-                completed={completed}
-                hideCompleted={hideCompleted}
-                onToggleTask={onToggleTask}
+                roadmapModule={roadmapModule}
+                status={statusFilter}
+                {...taskList}
               />
             ))}
           </div>
@@ -352,22 +362,33 @@ function ChipList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function ModuleCard({
-  stage,
-  module,
-  completed,
-  hideCompleted,
-  onToggleTask,
-}: {
+interface ModuleCardProps extends TaskListProps {
   stage: RoadmapStage;
-  module: RoadmapModule;
-  completed: CompletedTasks;
-  hideCompleted: boolean;
-  onToggleTask: (taskId: string) => void;
-}) {
-  const Icon = MODULE_ICONS[module.kind];
-  const summary = summarizeTasks(module.tasks, completed);
-  const tasks = hideCompleted ? module.tasks.filter((task) => !completed[task.id]) : module.tasks;
+  roadmapModule: RoadmapModule;
+  status: StatusFilter;
+  /** Search results pass the matching tasks; otherwise the status filter decides. */
+  visibleTasks?: readonly RoadmapTask[];
+  highlightTerms?: readonly string[];
+}
+
+export function ModuleCard({
+  stage,
+  roadmapModule,
+  status,
+  visibleTasks,
+  highlightTerms,
+  completed,
+  notes,
+  pinned,
+  onToggleTask,
+  onSaveNote,
+  onPinChange,
+}: ModuleCardProps) {
+  const Icon = MODULE_ICONS[roadmapModule.kind];
+  const summary = summarizeTasks(roadmapModule.tasks, completed);
+  const tasks =
+    visibleTasks ??
+    roadmapModule.tasks.filter((task) => pinned.has(task.id) || matchesStatus(Boolean(completed[task.id]), status));
 
   // A plain container: dozens of module regions named "Граматика", "Лексика"… would make landmark navigation ambiguous.
   return (
@@ -377,10 +398,12 @@ function ModuleCard({
           <Icon className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 id={`module-${module.id}`} tabIndex={-1} className="font-black text-slate-950 dark:text-white">
-            {module.title}
+          <h3 id={`module-${roadmapModule.id}`} tabIndex={-1} className="font-black text-slate-950 dark:text-white">
+            <Highlight text={roadmapModule.title} terms={highlightTerms} />
           </h3>
-          {module.intro ? <p className="mt-0.5 text-sm leading-6 text-slate-600 dark:text-slate-400">{module.intro}</p> : null}
+          {roadmapModule.intro ? (
+            <p className="mt-0.5 text-sm leading-6 text-slate-600 dark:text-slate-400">{roadmapModule.intro}</p>
+          ) : null}
         </div>
         <span
           className={cn(
@@ -399,13 +422,21 @@ function ModuleCard({
             <TaskItem
               key={task.id}
               stage={stage}
-              roadmapModule={module}
+              roadmapModule={roadmapModule}
               task={task}
               done={Boolean(completed[task.id])}
+              note={notes[task.id]}
+              highlightTerms={highlightTerms}
               onToggle={onToggleTask}
+              onSaveNote={onSaveNote}
+              onPinChange={onPinChange}
             />
           ))}
         </ul>
+      ) : status === "done" ? (
+        <p className="px-3 py-3 text-sm font-semibold text-slate-600 sm:px-4 dark:text-slate-400">
+          Виконаних пунктів у модулі ще немає
+        </p>
       ) : (
         <p className="flex items-center gap-2 px-3 py-3 text-sm font-semibold text-emerald-700 sm:px-4 dark:text-emerald-400">
           <CircleCheck className="size-4" aria-hidden="true" />
@@ -416,17 +447,79 @@ function ModuleCard({
   );
 }
 
+const chipButton = cn(
+  "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors",
+  focusRing,
+);
+
 interface TaskItemProps {
   stage: RoadmapStage;
   roadmapModule: RoadmapModule;
   task: RoadmapTask;
   done: boolean;
+  note: TaskNote | undefined;
+  highlightTerms: readonly string[] | undefined;
   onToggle: (taskId: string) => void;
+  onSaveNote: (taskId: string, text: string) => boolean;
+  onPinChange: (taskId: string, pinned: boolean) => void;
 }
 
-function TaskItem({ stage, roadmapModule, task, done, onToggle }: TaskItemProps) {
+// Memoised: checking one task or typing a note must not re-render the other ~200 tasks.
+const TaskItem = memo(function TaskItem({
+  stage,
+  roadmapModule,
+  task,
+  done,
+  note,
+  highlightTerms,
+  onToggle,
+  onSaveNote,
+  onPinChange,
+}: TaskItemProps) {
   const inputId = useId();
   const detailsId = `${inputId}-details`;
+  const noteId = `${inputId}-note`;
+  const [editingNote, setEditingNote] = useState(false);
+  // The text of a just-deleted note while its undo control is shown.
+  const [deletedNote, setDeletedNote] = useState<string | null>(null);
+  const noteButtonRef = useRef<HTMLButtonElement>(null);
+  const undoButtonRef = useRef<HTMLButtonElement>(null);
+  const keepVisible = editingNote || deletedNote !== null;
+  const noteLabel = note ? "Редагувати нотатку" : "Додати нотатку";
+
+  useEffect(() => {
+    if (!keepVisible) return;
+    onPinChange(task.id, true);
+    return () => onPinChange(task.id, false);
+  }, [keepVisible, task.id, onPinChange]);
+
+  useEffect(() => {
+    if (deletedNote !== null) undoButtonRef.current?.focus();
+  }, [deletedNote]);
+
+  const saveNote = useCallback((text: string) => onSaveNote(task.id, text), [onSaveNote, task.id]);
+
+  function toggleNoteEditor() {
+    setDeletedNote(null);
+    setEditingNote((value) => !value);
+  }
+
+  function closeNoteEditor() {
+    setEditingNote(false);
+    noteButtonRef.current?.focus();
+  }
+
+  function deleteNote(text: string) {
+    onSaveNote(task.id, "");
+    setEditingNote(false);
+    setDeletedNote(text);
+  }
+
+  function closeUndo(restore: boolean) {
+    if (restore && deletedNote) onSaveNote(task.id, deletedNote);
+    setDeletedNote(null);
+    noteButtonRef.current?.focus();
+  }
 
   return (
     <li
@@ -463,12 +556,12 @@ function TaskItem({ stage, roadmapModule, task, done, onToggle }: TaskItemProps)
                   : "text-slate-950 dark:text-slate-100",
               )}
             >
-              {task.title}
+              <Highlight text={task.title} terms={highlightTerms} />
             </label>
             {task.optional ? <Badge variant="sky">опційно</Badge> : null}
           </div>
           <p id={detailsId} className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
-            {task.details}
+            <Highlight text={task.details} terms={highlightTerms} />
           </p>
           {task.examples?.length ? (
             <ul className="mt-2 flex flex-wrap gap-x-2 gap-y-1" aria-label="Приклади">
@@ -479,7 +572,7 @@ function TaskItem({ stage, roadmapModule, task, done, onToggle }: TaskItemProps)
                     lang="en"
                     className="rounded bg-slate-100 px-2 py-1 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200"
                   >
-                    {example}
+                    <Highlight text={example} terms={highlightTerms} />
                   </span>
                   <SpeakButton word={example} className="size-8" />
                 </li>
@@ -488,15 +581,70 @@ function TaskItem({ stage, roadmapModule, task, done, onToggle }: TaskItemProps)
           ) : null}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <AiStudyMenu stage={stage} roadmapModule={roadmapModule} task={task} />
+            <button
+              ref={noteButtonRef}
+              type="button"
+              aria-expanded={editingNote}
+              aria-controls={editingNote ? noteId : undefined}
+              aria-label={`${noteLabel}: ${task.title}`}
+              onClick={toggleNoteEditor}
+              className={cn(
+                chipButton,
+                "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100",
+                "dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300 dark:hover:bg-amber-950",
+              )}
+            >
+              {note ? (
+                <PencilLine className="size-3.5" aria-hidden="true" />
+              ) : (
+                <StickyNote className="size-3.5" aria-hidden="true" />
+              )}
+              {noteLabel}
+            </button>
             {task.links?.map((link) => (
-              <RoadmapLinkChip key={link.href} link={link} />
+              <RoadmapLinkChip key={link.href} link={link} terms={highlightTerms} />
             ))}
           </div>
+          {editingNote ? (
+            <TaskNoteEditor
+              id={noteId}
+              taskTitle={task.title}
+              initialText={note?.text ?? ""}
+              onSave={saveNote}
+              onDone={closeNoteEditor}
+              onDelete={deleteNote}
+            />
+          ) : note ? (
+            <TaskNotePreview note={note} terms={highlightTerms} />
+          ) : null}
+          {deletedNote !== null ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+              <span>Нотатку видалено.</span>
+              <button
+                ref={undoButtonRef}
+                type="button"
+                aria-label="Відновити нотатку"
+                onClick={() => closeUndo(true)}
+                className={cn("inline-flex items-center gap-1 rounded font-semibold text-emerald-700 hover:underline dark:text-emerald-400", focusRing)}
+              >
+                <Undo2 className="size-4" aria-hidden="true" />
+                Відновити
+              </button>
+              <button
+                type="button"
+                aria-label="Закрити повідомлення"
+                onClick={() => closeUndo(false)}
+                className={cn("ml-auto grid size-8 place-items-center rounded-md text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700", focusRing)}
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </li>
   );
-}
+});
 
 function Pitfalls({ stage }: { stage: RoadmapStage }) {
   return (

@@ -47,6 +47,26 @@ Every released word has a Ukrainian translation, IPA field, CEFR level, category
 - Checklist progress is stored in `localStorage` under `english-path-roadmap-progress`, separately from the dictionary progress in IndexedDB.
 - Task ids are persisted: never rename an existing id, add a new task instead. Tasks marked `optional` (official exams and extras) do not count towards the percentage.
 
+### Notes
+
+Every task has a "Додати нотатку" button: own examples, mistakes, questions for a teacher. Notes are saved automatically while typing (and on blur or close), up to 2,000 characters each, in `localStorage` under `english-path-roadmap-notes` (`{ version: 1, notes: { [taskId]: { text, updatedAt } } }`). They sync between tabs and are kept when the checklist is reset. Deleting a note offers "Відновити". "Завантажити (.md)" exports all notes as a Markdown file in roadmap order; notes of removed tasks are kept under "Інші нотатки".
+
+### Search and filters
+
+The search field looks through level codes and titles, sections, task titles, descriptions, examples, link labels and the learner's notes. Every word must match; case and apostrophe variants (’ ʼ ') are ignored, and matches are highlighted. While a search or a level, section or notes filter is active, the guided plan is replaced by results grouped by level and section; the status filter alone ("Сховати виконані" is the same toggle) works inside the plan.
+
+Filters are kept in the address, so a filtered view survives a reload and can be bookmarked:
+
+| Parameter | Values |
+| --- | --- |
+| `q` | search text |
+| `level` | `start`, `a1`, `a2`, `b1`, `b2`, comma-separated |
+| `section` | `setup`, `grammar`, `vocabulary`, `pronunciation`, `listening`, `reading`, `speaking`, `writing`, `checkpoint`, comma-separated |
+| `status` | `todo` or `done` |
+| `notes` | `1`: only tasks with notes |
+
+Press `/` to jump to the search field; `Esc` clears it.
+
 ### Study a task with AI
 
 Every task has a "Вивчити з ШІ" menu. It builds a Ukrainian study prompt from the level, section, task description and examples, with a lesson plan that depends on the module (grammar, vocabulary, pronunciation, listening, reading, speaking, writing, checkpoint), and opens the chosen assistant in a new tab. The prompt is also copied to the clipboard.

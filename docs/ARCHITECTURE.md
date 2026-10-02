@@ -23,6 +23,10 @@
 
 `features/roadmap` holds the zero-to-B2 study plan. Content is static TypeScript in `content/`, progress rules are pure functions in `progress.ts`, and `progress-store.ts` is a `useSyncExternalStore` store backed by `localStorage` that syncs between tabs.
 
+`local-store.ts` is the shared store behind both browser-owned datasets: memory is the source of truth for rendering, `localStorage` persists it, the `storage` event syncs other tabs, and a failed write keeps the data for the session and reports `false`. `progress-store.ts` (checklist) and `notes-store.ts` (per-task notes; rules and the Markdown export in `notes.ts`) are thin wrappers around it.
+
+`filters.ts` holds search and filtering as pure functions: a search index built once from the content, `filterRoadmap` (notes are matched at query time because they change) and the URL parameter mapping. `roadmap-client.tsx` owns the filter state, restores it from the address after hydration, writes it back with a debounced `history.replaceState` and defers the query with `useDeferredValue` so typing stays responsive. Search results reuse `ModuleCard`; `TaskItem` is memoised, so checking a task or typing a note re-renders one task. A task with an open note editor or a pending undo is pinned for the filters it was opened with, so editing never makes it disappear, while a new search shows exactly what matches.
+
 `ai-study.ts` turns a task into a study prompt and lists the AI assistants with their deep-link formats; `ai-study-menu.tsx` is the per-task disclosure (a popover from `sm`, a bottom sheet below). Opening an assistant copies the prompt synchronously with `copyTextSync` from `shared/lib/copy-text.ts`, because the new tab takes focus before the async Clipboard API resolves. `shared/lib/use-dismiss.ts` closes both this menu and the header dropdowns on outside click, Escape and focus loss.
 
 ## Content Expansion
