@@ -65,6 +65,7 @@ describe("navigation config", () => {
         "/levels/A1",
         "/levels/A2",
         "/levels/B1",
+        "/levels/B2",
         "/irregular-verbs",
         "/reading",
         "/practice/review",

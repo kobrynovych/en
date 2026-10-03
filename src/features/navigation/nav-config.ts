@@ -50,6 +50,7 @@ const dictionary: NavLink[] = [
   { href: "/levels/A1", label: "Словник A1", shortLabel: "A1", description: "Початковий рівень", icon: Library },
   { href: "/levels/A2", label: "Словник A2", shortLabel: "A2", description: "Елементарний рівень", icon: Library },
   { href: "/levels/B1", label: "Словник B1", shortLabel: "B1", description: "Середній рівень", icon: Library },
+  { href: "/levels/B2", label: "Словник B2", shortLabel: "B2", description: "Вище середнього", icon: Library },
 ];
 
 const irregularVerbs: NavLink = {

@@ -1,5 +1,5 @@
 import type { RoadmapStage } from "../types";
-import { bcGrammar, bcSkill, EXTERNAL } from "./links";
+import { bcGrammar, bcSkill, EXTERNAL, SITE } from "./links";
 
 export const STAGE_B2: RoadmapStage = {
   id: "b2",
@@ -251,10 +251,10 @@ export const STAGE_B2: RoadmapStage = {
       tasks: [
         {
           id: "b2-vocabulary-oxford",
-          title: "Слова рівня B2 з Oxford 3000 і 5000",
+          title: "Пройдіть словник B2 на сайті",
           details:
-            "Словник сайту охоплює рівні A1–B1, тому слова B2 беріть зі списків Oxford 3000 і Oxford 5000 та додавайте в картки.",
-          links: [EXTERNAL.oxfordWordlists, EXTERNAL.anki],
+            "Працюйте зі словами B2 за темою поточного модуля: до кожного є переклад, примітка про вживання й п’ять прикладів. Звіряйтеся зі списками Oxford 3000 і 5000. Вивчення всіх записів словника не є умовою завершення рівня.",
+          links: [SITE.dictionaryB2, SITE.tests, EXTERNAL.oxfordWordlists],
         },
         {
           id: "b2-vocabulary-collocations",
@@ -543,6 +543,7 @@ export const STAGE_B2: RoadmapStage = {
     },
   ],
   resources: [
+    { ...SITE.dictionaryB2, note: "Слова B2 з перекладом, приміткою й прикладами" },
     { ...bcGrammar("граматика B1–B2", "b1-b2"), note: "Пояснення й вправи до тем рівня" },
     { ...bcSkill("listening", "b2"), note: "Складніші аудіо з транскриптами" },
     { ...EXTERNAL.oxfordWordlists, note: "Списки слів з рівнями CEFR" },

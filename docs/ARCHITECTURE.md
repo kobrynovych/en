@@ -10,7 +10,7 @@
 
 ## Data Flow
 
-1. `scripts/import-cefrj.mjs` downloads CEFR-J, normalizes A1-B1 entries, applies spelling overrides and enrichment packs, then writes `content/words/*.jsonl`.
+1. `scripts/import-cefrj.mjs` reads the saved CEFR-J CSV (`--refresh` downloads it again), normalizes A1-B2 entries, applies spelling overrides and enrichment packs, then writes `content/words/*.jsonl`.
 2. Server Components load JSONL with `getAllWords`, `getWordsByLevel`, and `getWordBySlug`.
 3. Client Components hydrate IndexedDB progress through `useProgressStore`.
 4. Screens compute derived stats locally from dictionary data plus progress records.
@@ -31,11 +31,12 @@
 
 ## Content Expansion
 
-To add B2, C1, or C2:
+A1-B2 are active. To add C1 or C2 (CEFR-J itself stops at B2, so a new level also needs a new source):
 
-1. Add the level to `ACTIVE_LEVELS`.
+1. Add the level to `ACTIVE_LEVELS` and to `LEVELS` in the importer and the validator.
 2. Let the importer write the new level JSONL.
 3. Add enrichment packs for the new level.
-4. Re-run strict validation and build.
+4. Add the level to the navigation config, the home page level grid and the roadmap links.
+5. Re-run strict validation and build.
 
-Manual enrichment should be added as new files in `content/enrichment/`, for example `core-b1-reviewed.jsonl`. Manual files override `auto-a1-b1.jsonl`.
+Manual enrichment should be added as new files in `content/enrichment/`, for example `core-b1-reviewed.jsonl`. Files named `auto-*` are applied first and every other pack overrides them by slug. B2 uses `curated-b2.jsonl`, written with AI assistance and meant to be reviewed like any other pack.

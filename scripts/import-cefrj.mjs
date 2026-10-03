@@ -9,7 +9,11 @@ const WORDS_DIR = path.join(ROOT, "content", "words");
 const OVERRIDES_DIR = path.join(ROOT, "content", "overrides");
 const ENRICHMENT_DIR = path.join(ROOT, "content", "enrichment");
 
-const LEVELS = ["A1", "A2", "B1"];
+const LEVELS = ["A1", "A2", "B1", "B2"];
+const REFRESH = process.argv.includes("--refresh");
+
+/** Entries left out of the dictionary on purpose: "headword|pos" → reason. */
+const EXCLUDED = new Map([["gook|noun", "an offensive ethnic slur in its most common sense"]]);
 const EXAMPLE_KINDS = ["affirmative", "negative", "question", "daily", "contextual"];
 
 const CATEGORY_RULES = [
@@ -233,10 +237,15 @@ function mergeEntry(base, spellingVariants, enrichment) {
   };
 }
 
-async function main() {
-  await mkdir(path.dirname(RAW_PATH), { recursive: true });
-  await mkdir(WORDS_DIR, { recursive: true });
-  await mkdir(OVERRIDES_DIR, { recursive: true });
+/** The committed CSV keeps imports reproducible and offline; `--refresh` downloads it again. */
+async function loadSource() {
+  if (!REFRESH) {
+    try {
+      return await readFile(RAW_PATH, "utf8");
+    } catch {
+      // No local copy yet: download it below.
+    }
+  }
 
   const response = await fetch(SOURCE_URL);
   if (!response.ok) {
@@ -245,6 +254,15 @@ async function main() {
 
   const csv = await response.text();
   await writeFile(RAW_PATH, csv, "utf8");
+  return csv;
+}
+
+async function main() {
+  await mkdir(path.dirname(RAW_PATH), { recursive: true });
+  await mkdir(WORDS_DIR, { recursive: true });
+  await mkdir(OVERRIDES_DIR, { recursive: true });
+
+  const csv = await loadSource();
 
   const spellingVariantsPath = path.join(OVERRIDES_DIR, "spelling-variants.json");
   const spellingVariants = await loadJsonIfExists(spellingVariantsPath, {});
@@ -252,7 +270,9 @@ async function main() {
     await writeFile(spellingVariantsPath, JSON.stringify(DEFAULT_SPELLING_VARIANTS, null, 2), "utf8");
   }
 
-  const rows = parseCsv(csv).filter((row) => LEVELS.includes(row.CEFR));
+  const rows = parseCsv(csv).filter(
+    (row) => LEVELS.includes(row.CEFR) && !EXCLUDED.has(`${normalizeHeadword(row.headword)}|${row.pos.trim()}`),
+  );
   const enrichment = await loadEnrichment();
   const unique = new Map();
 
@@ -296,7 +316,7 @@ async function main() {
     "utf8",
   );
 
-  console.log(`Imported ${unique.size} CEFR-J A1-B1 entries`);
+  console.log(`Imported ${unique.size} CEFR-J ${LEVELS[0]}-${LEVELS.at(-1)} entries`);
   console.table(summary);
 }
 
@@ -407,8 +427,13 @@ const SOURCES_MD = `# Content Sources
 - Cambridge A2 Key vocabulary list: https://www.cambridgeenglish.org/images/506886-a2-key-2020-vocabulary-list.pdf
 - Cambridge B1 Preliminary vocabulary list: https://www.cambridgeenglish.org/Images/506887-b1-preliminary-vocabulary-list.pdf
 - American Oxford 3000: https://www.oxfordlearnersdictionaries.com/external/pdf/wordlists/oxford-3000-5000/American_Oxford_3000.pdf
+- Oxford 5000 by CEFR level (second opinion for irregular verb levels): https://www.oxfordlearnersdictionaries.com/about/wordlists/oxford3000-5000
+- ipa-dict (American English IPA): https://github.com/open-dict-data/ipa-dict
 
-The generated dictionary imports CEFR-J A1-B1 entries as the base vocabulary. Enrichment files add Ukrainian translations, IPA, examples, spelling variants, and human-curated categories without changing UI code.
+The generated dictionary imports CEFR-J A1-B2 entries as the base vocabulary ("gook" is left out as an ethnic slur). Enrichment files add Ukrainian translations, IPA, examples, spelling variants, and human-curated categories without changing UI code.
+
+- \`content/enrichment/auto-a1-b1.jsonl\`: A1-B1, machine translation and template examples (\`npm run content:enrich\`).
+- \`content/enrichment/curated-b2.jsonl\`: B2, Ukrainian translations, usage notes and five example sentences per word written with AI assistance (Claude) for this project; review and correct them like any other enrichment pack.
 `;
 
 main().catch((error) => {

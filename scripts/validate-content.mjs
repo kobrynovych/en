@@ -3,7 +3,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const WORDS_DIR = path.join(ROOT, "content", "words");
-const LEVELS = ["a1", "a2", "b1"];
+const LEVELS = ["a1", "a2", "b1", "b2"];
 const REQUIRED_EXAMPLES = ["affirmative", "negative", "question", "daily", "contextual"];
 const STRICT = process.argv.includes("--strict");
 

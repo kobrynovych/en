@@ -26,6 +26,7 @@ The dictionary is stored outside UI components:
 - `content/words/a1.jsonl`
 - `content/words/a2.jsonl`
 - `content/words/b1.jsonl`
+- `content/words/b2.jsonl`
 - `content/enrichment/*.jsonl`
 - `content/overrides/spelling-variants.json`
 - `content/cache/translations-en-uk.json`
@@ -35,9 +36,18 @@ Current strict coverage:
 - A1: 1,164 words
 - A2: 1,411 words
 - B1: 2,446 words
-- Total: 5,021 words
+- B2: 2,777 words
+- Total: 7,798 words
 
 Every released word has a Ukrainian translation, IPA field, CEFR level, category, part of speech, spelling data, and five example sentence records. Manual enrichment files override generated enrichment. The generated file `content/enrichment/auto-a1-b1.jsonl` is machine-assisted and should be gradually improved by adding reviewed entries to separate manual enrichment files.
+
+B2 comes from `content/enrichment/curated-b2.jsonl`: 1–3 Ukrainian translations, a short usage note (collocations, register, false friends, warnings for offensive or dated words) and five examples per word, written with AI assistance (Claude) for this project. IPA is American English from ipa-dict; heteronyms use the reading that matches the part of speech, and the few words missing from ipa-dict have hand-written IPA. Treat the pack like any other enrichment: review and correct it. The importer leaves out one CEFR-J B2 entry, an ethnic slur.
+
+`npm run content:import` rebuilds `content/words/` from the saved CSV in `content/raw/`; `npm run content:import -- --refresh` downloads a fresh copy of CEFR-J first.
+
+## Irregular verbs
+
+`/irregular-verbs` lists 177 irregular verbs with Past Simple, Past Participle, audio and Ukrainian translations. Levels A1–B2 follow CEFR-J, like the dictionary, checked against the Oxford 5000; verbs that are in neither list up to B2 are marked C1. Pronunciation notes (read, wind, lie, saw…) open on hover or keyboard focus. The data lives in `src/features/irregular-verbs/data.ts`.
 
 ## Learning roadmap
 

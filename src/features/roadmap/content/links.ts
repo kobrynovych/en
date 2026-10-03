@@ -17,6 +17,7 @@ export const SITE = {
   dictionaryA1: { label: "Словник A1", href: "/levels/A1" },
   dictionaryA2: { label: "Словник A2", href: "/levels/A2" },
   dictionaryB1: { label: "Словник B1", href: "/levels/B1" },
+  dictionaryB2: { label: "Словник B2", href: "/levels/B2" },
   irregularVerbs: { label: "Неправильні дієслова", href: "/irregular-verbs" },
   reading: { label: "Читання з озвученням", href: "/reading" },
   flashcards: { label: "Флеш-картки", href: "/practice/flashcards" },

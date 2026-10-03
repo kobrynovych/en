@@ -26,7 +26,7 @@ export function HomeDashboard({
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-lg border border-slate-200 bg-white p-5 sm:p-7 dark:border-slate-700 dark:bg-slate-800/60">
           <div className="flex flex-wrap gap-2">
-            <Badge variant="emerald">CEFR A1-B1</Badge>
+            <Badge variant="emerald">CEFR A1–B2</Badge>
             <Badge variant="sky">Local-first</Badge>
             <Badge variant="amber">Spaced repetition</Badge>
           </div>
@@ -80,7 +80,7 @@ export function HomeDashboard({
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.levels.map((level) => (
           <Link
             key={level.level}

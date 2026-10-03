@@ -386,6 +386,7 @@ test("desktop dropdown opens dictionary levels", async ({ page, isMobile }) => {
   await expect(trigger).toBeFocused();
 
   await trigger.click();
+  await expect(nav.getByRole("link", { name: /^B2/ })).toBeVisible();
   await nav.getByRole("link", { name: /^B1/ }).click();
   await expect(page).toHaveURL(/\/levels\/B1\/?$/, DICTIONARY_PAGE);
   await expect(page.getByRole("heading", { name: "Словник B1" })).toBeVisible();

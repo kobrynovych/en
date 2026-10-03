@@ -9,12 +9,14 @@ import { EmptyState } from "@/shared/ui/empty-state";
 import { SpeakButton } from "@/shared/ui/speak-button";
 import { cn } from "@/shared/lib/cn";
 
-const CEFR_LEVELS: CefrLevel[] = ["A1", "A2", "B1"];
+const CEFR_LEVELS: CefrLevel[] = ["A1", "A2", "B1", "B2", "C1"];
 
 const cefrBadgeVariant: Record<CefrLevel, BadgeProps["variant"]> = {
   A1: "emerald",
   A2: "sky",
   B1: "amber",
+  B2: "violet",
+  C1: "rose",
 };
 
 function ukrainianVerbCount(n: number): string {
@@ -94,7 +96,8 @@ export function IrregularVerbsClient({ verbs }: { verbs: IrregularVerbEntry[] })
       <div>
         <h1 className="text-2xl font-black text-slate-950 dark:text-white">Неправильні дієслова</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Повний список неправильних дієслів англійської мови з перекладом і вимовою
+          Неправильні дієслова англійської мови з перекладом і вимовою. Рівні A1–B2 — за CEFR-J, як у словнику, з
+          перевіркою за Oxford 5000; C1 позначає рідші дієслова понад B2.
         </p>
       </div>
 
@@ -132,6 +135,7 @@ export function IrregularVerbsClient({ verbs }: { verbs: IrregularVerbEntry[] })
               <button
                 key={level}
                 type="button"
+                aria-pressed={active}
                 onClick={() => toggleLevel(level)}
                 className={cn(
                   "rounded-md border px-3 py-1.5 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600",
@@ -201,16 +205,20 @@ export function IrregularVerbsClient({ verbs }: { verbs: IrregularVerbEntry[] })
                       <div className="flex flex-wrap items-center gap-1.5">
                         <VerbForms forms={[verb.base]} isBase />
                         {verb.pronunciationNote && (
-                          <span
-                            className="group relative inline-flex shrink-0 cursor-help text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                            aria-label={verb.pronunciationNote}
-                            title={verb.pronunciationNote}
+                          // A button so keyboard and screen reader users reach the note too; the tooltip is visual only.
+                          <button
+                            type="button"
+                            aria-label={`Примітка до ${verb.base}: ${verb.pronunciationNote}`}
+                            className="group relative inline-flex shrink-0 cursor-help rounded text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:hover:text-slate-300"
                           >
                             <Info className="size-3.5" aria-hidden="true" />
-                            <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-64 -translate-x-1/2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-700 opacity-0 shadow-md transition-opacity group-hover:opacity-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                            <span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-64 -translate-x-1/2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-slate-700 opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                            >
                               {verb.pronunciationNote}
                             </span>
-                          </span>
+                          </button>
                         )}
                       </div>
                     </td>
